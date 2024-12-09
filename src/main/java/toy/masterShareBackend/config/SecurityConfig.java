@@ -21,6 +21,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                .authorizeHttpRequests(authorizeRequest -> authorizeRequest
+                        .anyRequest().permitAll()
+                )
+                .headers(config -> config.frameOptions(conf -> conf.disable()))
                 .cors(config -> config.configurationSource(configurationSource()))
                 .csrf(config -> config.disable());
 

@@ -12,6 +12,11 @@ spring:
       hibernate:
         format_sql: true
 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
 logging:
   level:
     org:
