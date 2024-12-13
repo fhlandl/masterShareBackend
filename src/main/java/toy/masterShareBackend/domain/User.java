@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +31,16 @@ public class User implements UserDetails {
 
     private String email;
 
+    @OneToOne
+    @JoinColumn(name = "board_id")
+    private Board board;
+
+    @OneToMany(mappedBy = "author")
+    private List<Message> writtenMessages = new ArrayList<>();
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     @Override
     public String getUsername() {
         return username;
@@ -49,5 +61,10 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+        board.setOwner(this);
     }
 }
