@@ -20,9 +20,10 @@ class UserServiceTest {
         String username = "user1";
         String password = "password1234567";
         String email = "masterShare@abc.com";
+        String nickname = "master_nick";
 
         // when
-        userService.join(username, password, email);
+        userService.join(username, password, email, nickname);
 
         // then
         userService.login(username, password);
@@ -34,13 +35,14 @@ class UserServiceTest {
         String username = "user1";
         String password = "password1234567";
         String email = "masterShare@abc.com";
+        String nickname = "master_nick";
 
         // when
-        userService.join(username, password, email);
+        userService.join(username, password, email, nickname);
 
         // then
         assertThatThrownBy(() -> {
-            userService.join(username, password, email);
+            userService.join(username, password, email, nickname);
         });
     }
 
@@ -50,9 +52,10 @@ class UserServiceTest {
         String username = "user1";
         String password = "password1234567";
         String email = "masterShare@abc.com";
+        String nickname = "master_nick";
 
         // when
-        userService.join(username, password, email);
+        userService.join(username, password, email, nickname);
 
         // then
         assertThatThrownBy(() -> {

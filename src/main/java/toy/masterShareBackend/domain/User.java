@@ -31,6 +31,8 @@ public class User implements UserDetails {
 
     private String email;
 
+    private String nickname;
+
     @OneToOne
     @JoinColumn(name = "board_id")
     private Board board;
@@ -52,10 +54,11 @@ public class User implements UserDetails {
     }
 
     @Builder
-    public User(String username, String password, String email) {
+    public User(String username, String password, String email, String nickname) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.nickname = nickname;
     }
 
     @Override

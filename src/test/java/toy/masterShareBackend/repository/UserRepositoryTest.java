@@ -24,6 +24,7 @@ class UserRepositoryTest {
                 .username("master_share")
                 .password("master_share_pw")
                 .email("master@abc.com")
+                .nickname("master_nick")
                 .build();
 
         // when
@@ -35,5 +36,6 @@ class UserRepositoryTest {
         assertThat(foundUser.getUsername()).isEqualTo("master_share");
         assertThat(foundUser.getPassword()).isEqualTo("master_share_pw");
         assertThat(foundUser.getEmail()).isEqualTo("master@abc.com");
+        assertThat(foundUser.getNickname()).isEqualTo("master_nick");
     }
 }

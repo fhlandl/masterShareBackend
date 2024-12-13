@@ -35,6 +35,7 @@ class MessageRepositoryTest {
                         .username("master_share")
                         .password("master_share_pw")
                         .email("master@abc.com")
+                        .nickname("master_nick")
                         .build()
         );
 
