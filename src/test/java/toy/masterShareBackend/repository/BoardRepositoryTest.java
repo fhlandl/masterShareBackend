@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
+import toy.masterShareBackend.domain.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,13 +18,27 @@ class BoardRepositoryTest {
     @Autowired
     BoardRepository boardRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     @Test
     void save() {
         // given
+        User user = userRepository.save(
+                User.builder()
+                        .username("master_share")
+                        .password("master_share_pw")
+                        .email("master@abc.com")
+                        .nickname("master_nick")
+                        .build()
+        );
+
         int MAX_SIZE = 15;
         Board board = Board.builder()
                 .maxSize(MAX_SIZE)
                 .build();
+
+        board.setOwner(user);
 
         // when
         Board savedBoard = boardRepository.save(board);
@@ -32,16 +47,28 @@ class BoardRepositoryTest {
         Board foundBoard = boardRepository.findById(savedBoard.getId()).get();
         assertThat(foundBoard).isEqualTo(savedBoard);
         assertThat(foundBoard.getMaxSize()).isEqualTo(MAX_SIZE);
+        assertThat(foundBoard.getOwner()).isEqualTo(user);
     }
 
     @Test
     void update() {
         // given
+        User user = userRepository.save(
+                User.builder()
+                        .username("master_share")
+                        .password("master_share_pw")
+                        .email("master@abc.com")
+                        .nickname("master_nick")
+                        .build()
+        );
+
         int MAX_SIZE_BEFORE = 15;
         int MAX_SIZE_AFTER = 20;
         Board board = Board.builder()
                 .maxSize(MAX_SIZE_BEFORE)
                 .build();
+        board.setOwner(user);
+
         Board savedBoard = boardRepository.save(board);
         log.info("savedGuestBook maxSize: {}", savedBoard.getMaxSize());
 

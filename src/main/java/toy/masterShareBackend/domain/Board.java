@@ -18,7 +18,8 @@ public class Board {
     @GeneratedValue
     private Long id;
 
-    @OneToOne(mappedBy = "board")
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
     @Column(name = "max_size")
@@ -33,10 +34,21 @@ public class Board {
     }
 
     public void setOwner(User owner) {
+        if (this.owner != null) {
+            this.owner.getBoards().remove(this);
+        }
         this.owner = owner;
+        owner.getBoards().add(this);
     }
 
     public void changeMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
+
+//    public void addMessages(Message message) {
+//        this.messages.add(message);
+//        if (message.getBoard() != this) {
+//            message.setBoard(this);
+//        }
+//    }
 }

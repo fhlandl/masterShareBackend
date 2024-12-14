@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -29,16 +30,18 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column
     private String email;
 
+    @Column
     private String nickname;
 
-    @OneToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    @OneToMany(mappedBy = "owner")
+    private List<Board> boards = new ArrayList<>();
 
+    // 내가 작성한 메시지 목록
     @OneToMany(mappedBy = "author")
-    private List<Message> writtenMessages = new ArrayList<>();
+    private List<Message> messages = new ArrayList<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -66,8 +69,16 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("user"));
     }
 
-    public void setBoard(Board board) {
-        this.board = board;
-        board.setOwner(this);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return username.equals(user.username) && password.equals(user.password) && Objects.equals(email, user.email) && Objects.equals(nickname, user.nickname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, email, nickname);
     }
 }

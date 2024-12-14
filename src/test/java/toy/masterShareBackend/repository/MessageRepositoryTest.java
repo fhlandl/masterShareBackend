@@ -30,20 +30,29 @@ class MessageRepositoryTest {
     @Test
     void save() {
         // given
-        User user = userRepository.save(
+        User author = userRepository.save(
                 User.builder()
-                        .username("master_share")
-                        .password("master_share_pw")
-                        .email("master@abc.com")
-                        .nickname("master_nick")
+                        .username("author")
+                        .password("author_pw")
+                        .email("author@abc.com")
+                        .nickname("author_nick")
                         .build()
         );
 
-        Board board = boardRepository.save(
-                Board.builder()
-                        .maxSize(15)
+        User owner = userRepository.save(
+                User.builder()
+                        .username("owner")
+                        .password("owner_pw")
+                        .email("owner@abc.com")
+                        .nickname("owner_nick")
                         .build()
         );
+
+        Board newBoard = Board.builder()
+                .maxSize(15)
+                .build();
+        newBoard.setOwner(owner);
+        Board board = boardRepository.save(newBoard);
 
         String title = "sample title";
         String content = "sample content";
@@ -53,7 +62,7 @@ class MessageRepositoryTest {
                 .build();
         LocalDateTime createdAt = message.getCreatedAt();
 
-        message.setAuthor(user);
+        message.setAuthor(author);
         message.setBoard(board);
 
         // when

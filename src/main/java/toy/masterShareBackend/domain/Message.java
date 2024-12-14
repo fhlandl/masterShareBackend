@@ -25,8 +25,10 @@ public class Message {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Column
     private String title;
 
+    @Column
     private String content;
 
     @Column(name = "is_opened", nullable = false)
@@ -48,19 +50,19 @@ public class Message {
     }
 
     public void setBoard(Board board) {
-//        if (this.board != null) {
-//            this.board.getMessages().remove(this);
-//        }
+        if (this.board != null) {
+            this.board.getMessages().remove(this);
+        }
         this.board = board;
         board.getMessages().add(this);
     }
 
     public void setAuthor(User author) {
-//        if (this.author != null) {
-//            this.author.getWrittenMessages().remove(author);
-//        }
+        if (this.author != null) {
+            this.author.getMessages().remove(this);
+        }
         this.author = author;
-        author.getWrittenMessages().add(this);
+        author.getMessages().add(this);
     }
 
     public void changeLastModifiedAt(LocalDateTime lastModifiedAt) {
