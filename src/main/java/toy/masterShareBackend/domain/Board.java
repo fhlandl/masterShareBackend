@@ -18,12 +18,12 @@ public class Board {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
     @Column(name = "max_size")
-    private Integer maxSize;
+    private Integer maxSize = 10;
 
     @OneToMany(mappedBy = "board")
     private List<Message> messages = new ArrayList<>();
@@ -44,11 +44,4 @@ public class Board {
     public void changeMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
-
-//    public void addMessages(Message message) {
-//        this.messages.add(message);
-//        if (message.getBoard() != this) {
-//            message.setBoard(this);
-//        }
-//    }
 }

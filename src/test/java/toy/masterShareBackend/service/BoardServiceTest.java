@@ -1,35 +1,66 @@
-package toy.masterShareBackend;
+package toy.masterShareBackend.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
+import toy.masterShareBackend.dto.BoardResponse;
+import toy.masterShareBackend.dto.MessageDto;
+import toy.masterShareBackend.dto.PageRequestDto;
+import toy.masterShareBackend.dto.PageResponseDto;
 import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
-@Component
-@RequiredArgsConstructor
-@Profile("!test")
-public class TestDataInit {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private final UserRepository userRepository;
-    private final BoardRepository boardRepository;
-    private final MessageRepository messageRepository;
+@SpringBootTest
+@Transactional
+class BoardServiceTest {
 
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void init() {
+    @Autowired
+    BoardService boardService;
 
-        initMessages();
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    BoardRepository boardRepository;
+
+    @Autowired
+    MessageRepository messageRepository;
+
+    @Test
+    void findBoard() {
+        // given
+        User owner = userRepository.save(User.builder()
+                .username("test")
+                .password("test_pw")
+                .email("test@abc.com")
+                .nickname("test_nick")
+                .build());
+
+        Board newBoard = Board.builder()
+                .maxSize(10)
+                .build();
+        newBoard.setOwner(owner);
+        Board board = boardRepository.save(newBoard);
+
+        // when
+        BoardResponse response = boardService.findBoard("test");
+
+        // then
+        assertThat(response.getUsername()).isEqualTo(owner.getUsername());
+        assertThat(response.getNickname()).isEqualTo(owner.getNickname());
+        assertThat(response.getMaxSize()).isEqualTo(newBoard.getMaxSize());
     }
 
-    private void initMessages() {
+    @Test
+    void findMessageList() {
+        // given
         User owner = userRepository.save(User.builder()
                 .username("test")
                 .password("test_pw")
@@ -83,5 +114,21 @@ public class TestDataInit {
 
             messageRepository.save(message);
         }
+
+        // when
+        int pageNum = 2;
+        int pageSize= 5;
+        PageResponseDto<MessageDto> response = boardService.findMessageList("test", new PageRequestDto(pageNum, pageSize));
+
+        // then
+        for (int i = 0; i < response.getDataList().size(); i++) {
+            MessageDto messageDto = response.getDataList().get(i);
+            assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
+            assertThat(messageDto.getContent()).isEqualTo(messageContents[14 - i][1]);
+        }
+
+        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
+        assertThat(response.getPrevPage()).isEqualTo(pageNum - 1);
+        assertThat(response.getNextPage()).isEqualTo(pageNum + 1);
     }
 }
