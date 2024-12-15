@@ -75,6 +75,7 @@ public class TestDataInit {
 
         for (String[] msgSrc : messageContents) {
             Message message = Message.builder()
+                    .sender(author.getNickname())
                     .title(msgSrc[0])
                     .content(msgSrc[1])
                     .build();

@@ -22,8 +22,11 @@ public class Message {
     private Board board;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "author_id")
     private User author;
+
+    @Column
+    private String sender;
 
     @Column
     private String title;
@@ -44,7 +47,8 @@ public class Message {
     private Boolean isDeleted = false;
 
     @Builder
-    public Message(String title, String content) {
+    public Message(String sender, String title, String content) {
+        this.sender = sender;
         this.title = title;
         this.content = content;
     }

@@ -106,6 +106,7 @@ class BoardServiceTest {
 
         for (String[] msgSrc : messageContents) {
             Message message = Message.builder()
+                    .sender(author.getNickname())
                     .title(msgSrc[0])
                     .content(msgSrc[1])
                     .build();
@@ -125,6 +126,7 @@ class BoardServiceTest {
             MessageDto messageDto = response.getDataList().get(i);
             assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
             assertThat(messageDto.getContent()).isEqualTo(messageContents[14 - i][1]);
+            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
         }
 
         assertThat(response.getCurrentPage()).isEqualTo(pageNum);

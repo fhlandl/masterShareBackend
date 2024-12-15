@@ -7,6 +7,8 @@ import lombok.Getter;
 @Getter
 public class MessageDto {
 
+    private String sender;
+
     private String title;
 
     private String content;

@@ -61,7 +61,7 @@ public class BoardService {
 
         Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> new MessageDto(msg.getTitle(), msg.getContent()))
+                .map(msg -> new MessageDto(msg.getSender(), msg.getTitle(), msg.getContent()))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
