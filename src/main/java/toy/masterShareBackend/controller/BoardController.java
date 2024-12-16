@@ -10,12 +10,12 @@ import toy.masterShareBackend.service.BoardService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/board/v1")
+@RequestMapping("/boards/v1")
 public class BoardController {
 
     private final BoardService boardService;
 
-    @GetMapping("/{username}")
+    @GetMapping("/{username}/board")
     public BoardResponse board(@PathVariable String username) {
 
         BoardResponse boardResponse = boardService.findBoard(username);
@@ -23,7 +23,7 @@ public class BoardController {
         return boardResponse;
     }
 
-    @GetMapping("/messages/{username}")
+    @GetMapping("/{username}/board/messages")
     public PageResponseDto<MessageDto> messages(@PathVariable String username, @ModelAttribute PageRequestDto pageRequestDto) {
         return boardService.findMessageList(username, pageRequestDto);
     }
