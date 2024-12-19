@@ -14,6 +14,8 @@ import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Profile("!test")
@@ -75,7 +77,9 @@ public class TestDataInit {
                 {"제목20", "삼 년 공부 한석봉 단원 풍속도 방랑 시인 김삿갓 지도 김정호"}
         };
 
-        for (String[] msgSrc : messageContents) {
+        List<Integer> openedMsgs = List.of(5, 12, 19);
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
             Message message = Message.builder()
                     .sender(author.getNickname())
                     .title(msgSrc[0])
@@ -83,6 +87,10 @@ public class TestDataInit {
                     .build();
             message.setAuthor(author);
             message.setBoard(board);
+
+            if (openedMsgs.contains(i)) {
+                message.open();
+            }
 
             messageRepository.save(message);
         }

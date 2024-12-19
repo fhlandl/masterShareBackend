@@ -125,7 +125,6 @@ class BoardServiceTest {
         for (int i = 0; i < response.getDataList().size(); i++) {
             MessageDto messageDto = response.getDataList().get(i);
             assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
-            assertThat(messageDto.getContent()).isEqualTo(messageContents[14 - i][1]);
             assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
         }
 

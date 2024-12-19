@@ -38,8 +38,8 @@ public class Message {
     @Column
     private String content;
 
-    @Column(name = "is_opened", nullable = false)
-    private Boolean isOpened = false;
+    @Column(nullable = false)
+    private boolean opened = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -75,5 +75,9 @@ public class Message {
 
     public void changeLastModifiedAt(LocalDateTime lastModifiedAt) {
         this.lastModifiedAt = lastModifiedAt;
+    }
+
+    public void open() {
+        this.opened = true;
     }
 }

@@ -13,5 +13,9 @@ public class MessageDto {
 
     private String title;
 
-    private String content;
+//    private String content;
+
+    private boolean opened;
+
+    private String createdAt;
 }

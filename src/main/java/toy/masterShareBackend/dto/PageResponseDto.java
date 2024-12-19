@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Getter
 @NoArgsConstructor
@@ -23,7 +21,7 @@ public class PageResponseDto<E> {
 
     private int totalDataCount, currentPage;
 
-    private Integer prevPage, nextPage;
+    private Integer prevPage, nextPage, lastPage;
 
     public PageResponseDto(List<E> dataList, PageRequestDto pageRequest, long totalDataCount) {
 
@@ -51,5 +49,7 @@ public class PageResponseDto<E> {
         }
 
         this.currentPage = pageRequest.getPage();
+
+        this.lastPage = last;
     }
 }

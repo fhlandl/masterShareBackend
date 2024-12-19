@@ -18,6 +18,7 @@ import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,13 @@ public class BoardService {
 
         Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> new MessageDto(msg.getMessageId(), msg.getSender(), msg.getTitle(), msg.getContent()))
+                .map(msg -> new MessageDto(
+                        msg.getMessageId(),
+                        msg.getSender(),
+                        msg.getTitle(),
+                        msg.isOpened(),
+                        msg.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
+                ))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
