@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
@@ -21,6 +22,7 @@ public class TestDataInit {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final MessageRepository messageRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
@@ -32,14 +34,14 @@ public class TestDataInit {
     private void initMessages() {
         User owner = userRepository.save(User.builder()
                 .username("test")
-                .password("test_pw")
+                .password(passwordEncoder.encode("test_pw"))
                 .email("test@abc.com")
                 .nickname("test_nick")
                 .build());
 
         User author = userRepository.save(User.builder()
                 .username("guest")
-                .password("guest_pw")
+                .password(passwordEncoder.encode("guest_pw"))
                 .email("guest@abc.com")
                 .nickname("guest_nick")
                 .build());
