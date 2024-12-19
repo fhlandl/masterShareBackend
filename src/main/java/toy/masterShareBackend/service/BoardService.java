@@ -62,18 +62,42 @@ public class BoardService {
 
         Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> new MessageDto(
-                        msg.getMessageId(),
-                        msg.getSender(),
-                        msg.getTitle(),
-                        msg.isOpened(),
-                        msg.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
-                ))
+                .map(msg -> convertMessageToMessageDto(msg))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
 
         PageResponseDto pageResponseDto = new PageResponseDto(dtoList, pageRequestDto, totalCount);
         return pageResponseDto;
+    }
+
+    @Transactional(readOnly = true)
+    public MessageDto readMessage(String messageId) {
+
+        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+        if (!message.isOpened()) {
+            throw new RuntimeException("Message has not been opened yet");
+        }
+
+        return convertMessageToMessageDto(message);
+    }
+
+    public MessageDto openMessage(String messageId) {
+
+        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+        message.open();
+
+        return convertMessageToMessageDto(message);
+    }
+
+    private MessageDto convertMessageToMessageDto(Message message) {
+        return MessageDto.builder()
+                .messageId(message.getMessageId())
+                .sender(message.getSender())
+                .title(message.getTitle())
+                .content(message.getContent())
+                .opened(message.isOpened())
+                .createdAt(message.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
+                .build();
     }
 }

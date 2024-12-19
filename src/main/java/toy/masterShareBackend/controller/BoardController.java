@@ -1,6 +1,7 @@
 package toy.masterShareBackend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import toy.masterShareBackend.dto.BoardResponse;
 import toy.masterShareBackend.dto.MessageDto;
@@ -26,5 +27,23 @@ public class BoardController {
     @GetMapping("/{userId}/board/messages")
     public PageResponseDto<MessageDto> messages(@PathVariable String userId, @ModelAttribute PageRequestDto pageRequestDto) {
         return boardService.findMessageList(userId, pageRequestDto);
+    }
+
+    @GetMapping("/message/{messageId}")
+    public ResponseEntity<?> getMessage(@PathVariable String messageId) {
+
+        try {
+            MessageDto messageDto = boardService.readMessage(messageId);
+            return ResponseEntity.ok(messageDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/message/open/{messageId}")
+    public MessageDto openMessage(@PathVariable String messageId) {
+
+        MessageDto messageDto = boardService.openMessage(messageId);
+        return messageDto;
     }
 }

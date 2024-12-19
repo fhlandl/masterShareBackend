@@ -16,6 +16,7 @@ import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -33,21 +34,39 @@ class BoardServiceTest {
     @Autowired
     MessageRepository messageRepository;
 
+    private User createUser(String username) {
+        return userRepository.save(User.builder()
+                .username(username)
+                .password(username + "_pw")
+                .email(username + "@abc.com")
+                .nickname(username + "_nick")
+                .build());
+    }
+
+    private Board createBoard(User owner, int maxSize) {
+        Board newBoard = Board.builder()
+                .maxSize(maxSize)
+                .build();
+        newBoard.setOwner(owner);
+        return boardRepository.save(newBoard);
+    }
+
+    private Message createMessage(Board board, User author, String sender, String title, String content) {
+        Message message = Message.builder()
+                .sender(sender)
+                .title(title)
+                .content(content)
+                .build();
+        message.setBoard(board);
+        message.setAuthor(author);
+        return messageRepository.save(message);
+    }
+
     @Test
     void findBoard() {
         // given
-        User owner = userRepository.save(User.builder()
-                .username("test")
-                .password("test_pw")
-                .email("test@abc.com")
-                .nickname("test_nick")
-                .build());
-
-        Board newBoard = Board.builder()
-                .maxSize(10)
-                .build();
-        newBoard.setOwner(owner);
-        Board board = boardRepository.save(newBoard);
+        User owner = createUser("test");
+        Board board = createBoard(owner, 10);
 
         // when
         BoardResponse response = boardService.findBoard(owner.getUserId());
@@ -55,31 +74,15 @@ class BoardServiceTest {
         // then
         assertThat(response.getUsername()).isEqualTo(owner.getUsername());
         assertThat(response.getNickname()).isEqualTo(owner.getNickname());
-        assertThat(response.getMaxSize()).isEqualTo(newBoard.getMaxSize());
+        assertThat(response.getMaxSize()).isEqualTo(board.getMaxSize());
     }
 
     @Test
     void findMessageList() {
         // given
-        User owner = userRepository.save(User.builder()
-                .username("test")
-                .password("test_pw")
-                .email("test@abc.com")
-                .nickname("test_nick")
-                .build());
-
-        User author = userRepository.save(User.builder()
-                .username("guest")
-                .password("guest_pw")
-                .email("guest@abc.com")
-                .nickname("guest_nick")
-                .build());
-
-        Board newBoard = Board.builder()
-                .maxSize(10)
-                .build();
-        newBoard.setOwner(owner);
-        Board board = boardRepository.save(newBoard);
+        User owner = createUser("test");
+        User author = createUser("guest");
+        Board board = createBoard(owner, 10);
 
         String[][] messageContents = {
                 {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
@@ -105,15 +108,7 @@ class BoardServiceTest {
         };
 
         for (String[] msgSrc : messageContents) {
-            Message message = Message.builder()
-                    .sender(author.getNickname())
-                    .title(msgSrc[0])
-                    .content(msgSrc[1])
-                    .build();
-            message.setAuthor(author);
-            message.setBoard(board);
-
-            messageRepository.save(message);
+            createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1]);
         }
 
         // when
@@ -131,5 +126,71 @@ class BoardServiceTest {
         assertThat(response.getCurrentPage()).isEqualTo(pageNum);
         assertThat(response.getPrevPage()).isEqualTo(pageNum - 1);
         assertThat(response.getNextPage()).isEqualTo(pageNum + 1);
+    }
+
+    @Test
+    void readMessageSuccess() {
+        // given
+        User owner = createUser("test");
+        User author = createUser("guest");
+        Board board = createBoard(owner, 10);
+
+        String title = "제목";
+        String content = "내용";
+        String sender = author.getNickname();
+
+        Message message = createMessage(board, author, sender, title, content);
+        message.open();
+
+        // when
+        MessageDto messageDto = boardService.readMessage(message.getMessageId());
+
+        // then
+        assertThat(messageDto.getSender()).isEqualTo(sender);
+        assertThat(messageDto.getTitle()).isEqualTo(title);
+        assertThat(messageDto.getContent()).isEqualTo(content);
+        assertThat(messageDto.isOpened()).isTrue();
+    }
+
+    @Test
+    void readMessageFail() {
+        // given
+        User owner = createUser("test");
+        User author = createUser("guest");
+        Board board = createBoard(owner, 10);
+
+        String title = "제목";
+        String content = "내용";
+        String sender = author.getNickname();
+
+        Message message = createMessage(board, author, sender, title, content);
+
+        // when, then
+        assertThatThrownBy(() -> {
+            boardService.readMessage(message.getMessageId());
+        });
+    }
+
+    @Test
+    void openMessage() {
+        // given
+        User owner = createUser("test");
+        User author = createUser("guest");
+        Board board = createBoard(owner, 10);
+
+        String title = "제목";
+        String content = "내용";
+        String sender = author.getNickname();
+
+        Message message = createMessage(board, author, sender, title, content);
+
+        // when
+        MessageDto messageDto = boardService.openMessage(message.getMessageId());
+
+        // then
+        assertThat(messageDto.getSender()).isEqualTo(sender);
+        assertThat(messageDto.getTitle()).isEqualTo(title);
+        assertThat(messageDto.getContent()).isEqualTo(content);
+        assertThat(messageDto.isOpened()).isTrue();
     }
 }
