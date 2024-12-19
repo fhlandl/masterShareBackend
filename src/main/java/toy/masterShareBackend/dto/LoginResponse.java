@@ -13,10 +13,10 @@ public class LoginResponse {
     private UserInfo userInfo;
 
     @Builder
-    public LoginResponse(boolean success, String message, String username, String email, String nickname) {
+    public LoginResponse(boolean success, String message, String userId, String username, String email, String nickname) {
         this.success = success;
         this.message = message;
-        this.userInfo = new UserInfo(username, email, nickname);
+        this.userInfo = new UserInfo(userId, username, email, nickname);
     }
 
     public LoginResponse(boolean success, String message) {
@@ -27,6 +27,7 @@ public class LoginResponse {
     @AllArgsConstructor
     @Getter
     static class UserInfo {
+        String userId;
         String username;
         String email;
         String nickname;

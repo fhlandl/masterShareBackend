@@ -50,7 +50,7 @@ class BoardServiceTest {
         Board board = boardRepository.save(newBoard);
 
         // when
-        BoardResponse response = boardService.findBoard("test");
+        BoardResponse response = boardService.findBoard(owner.getUserId());
 
         // then
         assertThat(response.getUsername()).isEqualTo(owner.getUsername());
@@ -119,7 +119,7 @@ class BoardServiceTest {
         // when
         int pageNum = 2;
         int pageSize= 5;
-        PageResponseDto<MessageDto> response = boardService.findMessageList("test", new PageRequestDto(pageNum, pageSize));
+        PageResponseDto<MessageDto> response = boardService.findMessageList(owner.getUserId(), new PageRequestDto(pageNum, pageSize));
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {

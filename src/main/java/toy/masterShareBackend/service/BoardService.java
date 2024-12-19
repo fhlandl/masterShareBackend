@@ -32,8 +32,8 @@ public class BoardService {
     private final MessageRepository messageRepository;
 
     @Transactional(readOnly = true)
-    public BoardResponse findBoard(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow();
+    public BoardResponse findBoard(String userId) {
+        User user = userRepository.findByUserId(userId).orElseThrow();
         Board board = user.getBoards().stream()
                 .findFirst()
                 .get();
@@ -46,9 +46,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findMessageList(String username, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findMessageList(String userId, PageRequestDto pageRequestDto) {
 
-        User user = userRepository.findByUsername(username).orElseThrow();
+        User user = userRepository.findByUserId(userId).orElseThrow();
         Board board = user.getBoards().stream()
                 .findFirst()
                 .get();
@@ -61,7 +61,7 @@ public class BoardService {
 
         Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> new MessageDto(msg.getSender(), msg.getTitle(), msg.getContent()))
+                .map(msg -> new MessageDto(msg.getMessageId(), msg.getSender(), msg.getTitle(), msg.getContent()))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();

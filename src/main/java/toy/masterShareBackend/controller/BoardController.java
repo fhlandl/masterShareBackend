@@ -15,16 +15,16 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @GetMapping("/{username}/board")
-    public BoardResponse board(@PathVariable String username) {
+    @GetMapping("/{userId}/board")
+    public BoardResponse board(@PathVariable String userId) {
 
-        BoardResponse boardResponse = boardService.findBoard(username);
+        BoardResponse boardResponse = boardService.findBoard(userId);
 
         return boardResponse;
     }
 
-    @GetMapping("/{username}/board/messages")
-    public PageResponseDto<MessageDto> messages(@PathVariable String username, @ModelAttribute PageRequestDto pageRequestDto) {
-        return boardService.findMessageList(username, pageRequestDto);
+    @GetMapping("/{userId}/board/messages")
+    public PageResponseDto<MessageDto> messages(@PathVariable String userId, @ModelAttribute PageRequestDto pageRequestDto) {
+        return boardService.findMessageList(userId, pageRequestDto);
     }
 }

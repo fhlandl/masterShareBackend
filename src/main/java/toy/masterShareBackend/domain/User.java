@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import toy.masterShareBackend.util.IdUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue
     private Long id;
+
+    @Column(name = "user_id", nullable = false, unique = true)
+    private String userId = IdUtil.generateUniqueId();
 
     @Column(nullable = false, unique = true)
     private String username;

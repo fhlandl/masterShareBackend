@@ -44,6 +44,7 @@ public class AuthController {
             return ResponseEntity.ok(LoginResponse.builder()
                     .success(true)
                     .message("Login successful!")
+                    .userId(user.getUserId())
                     .username(user.getUsername())
                     .email(user.getEmail())
                     .nickname(user.getNickname())
