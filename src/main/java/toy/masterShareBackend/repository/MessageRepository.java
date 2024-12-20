@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    Page<Message> findByBoardId(Long boardId, Pageable pageable);
+    Page<Message> findByBoardIdAndDeletedFalse(Long boardId, Pageable pageable);
 
     Optional<Message> findByMessageId(String messageId);
 }

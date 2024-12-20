@@ -60,7 +60,7 @@ public class BoardService {
                 Sort.by("createdAt").descending()
         );
 
-        Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
+        Page<Message> result = messageRepository.findByBoardIdAndDeletedFalse(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
                 .map(msg -> convertMessageToMessageDto(msg, false))
                 .collect(Collectors.toList());
@@ -107,6 +107,11 @@ public class BoardService {
         Message message = messageRepository.save(newMessage);
 
         return convertMessageToMessageDto(message, false);
+    }
+
+    public void deleteMessage(String messageId) {
+        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+        message.delete();
     }
 
     private MessageDto convertMessageToMessageDto(Message message, boolean includeContent) {

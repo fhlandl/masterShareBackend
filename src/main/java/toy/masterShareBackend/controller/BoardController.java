@@ -50,4 +50,11 @@ public class BoardController {
         MessageDto messageDto = boardService.createMessage(userId, dto.getSender(), dto.getTitle(), dto.getContent());
         return messageDto;
     }
+
+    @PatchMapping("/message/delete/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable String messageId) {
+
+        boardService.deleteMessage(messageId);
+        return ResponseEntity.ok("Message " + messageId +  " deleted");
+    }
 }

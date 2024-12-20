@@ -60,7 +60,9 @@ class BoardServiceTest {
                 .content(content)
                 .build();
         message.setBoard(board);
-        message.setAuthor(author);
+        if (author != null) {
+            message.setAuthor(author);
+        }
         return messageRepository.save(message);
     }
 
@@ -215,5 +217,25 @@ class BoardServiceTest {
         assertThat(messageDto.getTitle()).isEqualTo(title);
         assertThat(messageDto.getContent()).isNull();
         assertThat(messageDto.isOpened()).isFalse();
+    }
+
+    @Test
+    void deleteMessage() {
+        // given
+        User owner = createUser("test");
+        Board board = createBoard(owner, 10);
+
+        String sender = "보낸사람";
+        String title = "제목";
+        String content = "내용";
+
+        Message message = createMessage(board, null, sender, title, content);
+
+        // when
+        boardService.deleteMessage(message.getMessageId());
+
+        // then
+        Message foundMessage = messageRepository.findById(message.getId()).get();
+        assertThat(foundMessage.isDeleted()).isTrue();
     }
 }

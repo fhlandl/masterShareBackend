@@ -47,8 +47,8 @@ public class Message {
     @Column(name = "last_modified_at")
     private LocalDateTime lastModifiedAt;
 
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @Builder
     public Message(String sender, String title, String content) {
@@ -79,5 +79,9 @@ public class Message {
 
     public void open() {
         this.opened = true;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }
