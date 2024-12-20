@@ -3,10 +3,7 @@ package toy.masterShareBackend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import toy.masterShareBackend.dto.BoardResponse;
-import toy.masterShareBackend.dto.MessageDto;
-import toy.masterShareBackend.dto.PageRequestDto;
-import toy.masterShareBackend.dto.PageResponseDto;
+import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.service.BoardService;
 
 @RestController
@@ -44,6 +41,13 @@ public class BoardController {
     public MessageDto openMessage(@PathVariable String messageId) {
 
         MessageDto messageDto = boardService.openMessage(messageId);
+        return messageDto;
+    }
+
+    @PostMapping("/{userId}/board/message/new")
+    public MessageDto createMessage(@PathVariable String userId, @RequestBody CreateMessageRequest dto) {
+
+        MessageDto messageDto = boardService.createMessage(userId, dto.getSender(), dto.getTitle(), dto.getContent());
         return messageDto;
     }
 }

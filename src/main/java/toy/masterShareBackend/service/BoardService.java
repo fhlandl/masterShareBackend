@@ -62,7 +62,7 @@ public class BoardService {
 
         Page<Message> result = messageRepository.findByBoardId(board.getId(), pageable);
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> convertMessageToMessageDto(msg))
+                .map(msg -> convertMessageToMessageDto(msg, false))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
@@ -79,7 +79,7 @@ public class BoardService {
             throw new RuntimeException("Message has not been opened yet");
         }
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, true);
     }
 
     public MessageDto openMessage(String messageId) {
@@ -87,15 +87,35 @@ public class BoardService {
         Message message = messageRepository.findByMessageId(messageId).orElseThrow();
         message.open();
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, true);
     }
 
-    private MessageDto convertMessageToMessageDto(Message message) {
+    public MessageDto createMessage(String ownerId, String sender, String title, String content) {
+
+        User owner = userRepository.findByUserId(ownerId).orElseThrow();
+        Board board = owner.getBoards().stream()
+                .findFirst()
+                .get();
+
+        Message newMessage = Message.builder()
+                .sender(sender)
+                .title(title)
+                .content(content)
+                .build();
+        newMessage.setBoard(board);
+
+        Message message = messageRepository.save(newMessage);
+
+        return convertMessageToMessageDto(message, false);
+    }
+
+    private MessageDto convertMessageToMessageDto(Message message, boolean includeContent) {
+        String content = includeContent ? message.getContent() : null;
         return MessageDto.builder()
                 .messageId(message.getMessageId())
                 .sender(message.getSender())
                 .title(message.getTitle())
-                .content(message.getContent())
+                .content(content)
                 .opened(message.isOpened())
                 .createdAt(message.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
                 .build();

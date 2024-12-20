@@ -1,5 +1,6 @@
 package toy.masterShareBackend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
+@Slf4j
 class BoardServiceTest {
 
     @Autowired
@@ -192,5 +194,26 @@ class BoardServiceTest {
         assertThat(messageDto.getTitle()).isEqualTo(title);
         assertThat(messageDto.getContent()).isEqualTo(content);
         assertThat(messageDto.isOpened()).isTrue();
+    }
+
+    @Test
+    void createMessage() {
+        // given
+        User owner = createUser("test");
+        Board board = createBoard(owner, 10);
+
+        String sender = "보낸사람";
+        String title = "제목";
+        String content = "내용";
+
+        // when
+        MessageDto messageDto = boardService.createMessage(owner.getUserId(), sender, title, content);
+
+        // then
+        log.info("Message {} created - {}", messageDto.getMessageId(), messageDto.getCreatedAt());
+        assertThat(messageDto.getSender()).isEqualTo(sender);
+        assertThat(messageDto.getTitle()).isEqualTo(title);
+        assertThat(messageDto.getContent()).isNull();
+        assertThat(messageDto.isOpened()).isFalse();
     }
 }
