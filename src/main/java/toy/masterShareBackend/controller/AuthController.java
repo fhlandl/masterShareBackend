@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.LoginRequest;
 import toy.masterShareBackend.dto.LoginResponse;
+import toy.masterShareBackend.dto.UserInfo;
 import toy.masterShareBackend.dto.UserJoinRequest;
 import toy.masterShareBackend.dto.UserJoinResponse;
 import toy.masterShareBackend.service.UserService;
@@ -29,8 +30,13 @@ public class AuthController {
     public ResponseEntity<UserJoinResponse> join(@RequestBody UserJoinRequest dto) {
 
         try {
-            userService.join(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getNickname());
-            return ResponseEntity.ok(new UserJoinResponse(true, "Join successful!"));
+            User user = userService.join(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getNickname());
+            UserInfo userInfo = new UserInfo(user.getUserId(), user.getUsername(), user.getEmail(), user.getNickname());
+            return ResponseEntity.ok(new UserJoinResponse(
+                true,
+                "Join successful!",
+                userInfo
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new UserJoinResponse(false, "Join failed. " + e.getMessage()));
         }
@@ -41,14 +47,14 @@ public class AuthController {
 
         try {
             User user = userService.login(dto.getUsername(), dto.getPassword());
-            return ResponseEntity.ok(LoginResponse.builder()
-                    .success(true)
-                    .message("Login successful!")
-                    .userId(user.getUserId())
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .nickname(user.getNickname())
-                    .build());
+            UserInfo userInfo = new UserInfo(user.getUserId(), user.getUsername(), user.getEmail(), user.getNickname());
+
+            return ResponseEntity.ok(new LoginResponse(
+                true,
+                "Login successful!",
+                userInfo
+            ));
+
         } catch (NoSuchElementException e) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(false, "Login failed: invalid username or password"));

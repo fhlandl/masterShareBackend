@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void join(String username, String password, String email, String nickname) {
+    public User join(String username, String password, String email, String nickname) {
         validateDuplicateUsername(username);
 
         User user = User.builder()
@@ -26,7 +26,8 @@ public class UserService {
                 .email(email)
                 .nickname(nickname)
                 .build();
-        userRepository.save(user);
+
+        return userRepository.save(user);
     }
 
     private void validateDuplicateUsername(String username) {

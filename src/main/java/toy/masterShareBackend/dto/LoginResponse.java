@@ -1,7 +1,5 @@
 package toy.masterShareBackend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,24 +10,14 @@ public class LoginResponse {
     private String message;
     private UserInfo userInfo;
 
-    @Builder
-    public LoginResponse(boolean success, String message, String userId, String username, String email, String nickname) {
+    public LoginResponse(boolean success, String message, UserInfo userInfo) {
         this.success = success;
         this.message = message;
-        this.userInfo = new UserInfo(userId, username, email, nickname);
+        this.userInfo = userInfo;
     }
 
     public LoginResponse(boolean success, String message) {
         this.success = success;
         this.message = message;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    static class UserInfo {
-        String userId;
-        String username;
-        String email;
-        String nickname;
     }
 }
