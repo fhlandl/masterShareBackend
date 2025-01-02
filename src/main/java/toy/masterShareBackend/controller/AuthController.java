@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.jwt.JwtUtil;
+import toy.masterShareBackend.service.BoardService;
 import toy.masterShareBackend.service.UserService;
 
 
@@ -24,6 +25,7 @@ import toy.masterShareBackend.service.UserService;
 public class AuthController {
 
     private final UserService userService;
+    private final BoardService boardService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
@@ -31,7 +33,8 @@ public class AuthController {
     public ResponseEntity<UserJoinResponse> join(@RequestBody UserJoinRequest dto) {
 
         try {
-            userService.join(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getNickname());
+            User user = userService.join(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getNickname());
+            boardService.createBoard(user, 10);
 
             UserTokenInfo userTokenInfo = authenticateAndGenerateToken(dto.getUsername(), dto.getPassword());
 

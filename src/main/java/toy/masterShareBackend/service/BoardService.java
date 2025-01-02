@@ -32,6 +32,15 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MessageRepository messageRepository;
 
+    public void createBoard(User owner, int maxSize) {
+
+        Board newBoard = Board.builder()
+                .maxSize(maxSize)
+                .build();
+        newBoard.setOwner(owner);
+        boardRepository.save(newBoard);
+    }
+
     @Transactional(readOnly = true)
     public BoardResponse findBoard(String userId) {
         User user = userRepository.findByUserId(userId).orElseThrow();
