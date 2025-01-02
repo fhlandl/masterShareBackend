@@ -23,3 +23,9 @@ logging:
       hibernate:
         SQL: debug
         orm.jdbc.bind: TRACE
+      springframework:
+        security:
+          web: trace
+
+jwt:
+  secret_key: master-share-jwt-secret-master-share-jwt-secret

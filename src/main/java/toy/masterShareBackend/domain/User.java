@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import toy.masterShareBackend.util.IdUtil;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -84,5 +81,17 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(username, password, email, nickname);
+    }
+
+    public Map<String, Object> toClaims() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("username", username);
+        claims.put("password", password);
+        claims.put("email", email);
+        claims.put("nickname", nickname);
+        claims.put("roles", getAuthorities());
+
+        return claims;
     }
 }

@@ -1,23 +1,26 @@
 package toy.masterShareBackend.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserJoinResponse {
     private boolean success;
     private String message;
     private UserInfo userInfo;
+    private String accessToken;
+    private String refreshToken;
 
-    public UserJoinResponse(boolean success, String message, UserInfo userInfo) {
+    @Builder
+    public UserJoinResponse(boolean success, String message, UserInfo userInfo, String accessToken, String refreshToken) {
         this.success = success;
         this.message = message;
         this.userInfo = userInfo;
-    }
-
-    public UserJoinResponse(boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 }

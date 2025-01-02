@@ -37,11 +37,11 @@ public class UserService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public User login(String username, String password) {
-
-        return userRepository.findByUsername(username)
-                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElseThrow();
-    }
+//    @Transactional(readOnly = true)
+//    public User login(String username, String password) {
+//
+//        return userRepository.findByUsername(username)
+//                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
+//                .orElseThrow();
+//    }
 }
