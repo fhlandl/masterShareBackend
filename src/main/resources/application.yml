@@ -29,3 +29,7 @@ logging:
 
 jwt:
   secret_key: master-share-jwt-secret-master-share-jwt-secret
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

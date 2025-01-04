@@ -1,6 +1,7 @@
 package toy.masterShareBackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +10,18 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponse {
+    @Schema(example = "true")
     private boolean success;
+
+    @Schema(example = "LOGIN_SUCCESS")
     private String message;
+
     private UserInfo userInfo;
+
+    @Schema(example = "eyJ0eXAiOiJKV1QiL...")
     private String accessToken;
+
+    @Schema(example = "eyJ0eXAiOiJKV1QiL...")
     private String refreshToken;
 
     @Builder

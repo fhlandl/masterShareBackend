@@ -1,5 +1,11 @@
 package toy.masterShareBackend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +23,7 @@ import toy.masterShareBackend.jwt.JwtUtil;
 import toy.masterShareBackend.service.BoardService;
 import toy.masterShareBackend.service.UserService;
 
-
+@Tag(name = "Auth API", description = "로그인, 회원가입, 권한 등 인증 및 인가에 대한 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +35,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Operation(summary = "회원가입")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(implementation = UserJoinResponse.class)
+    ))
+    @ApiResponse(responseCode = "400", description = "회원가입 실패", content = @Content(
+            schema = @Schema(implementation = UserJoinResponse.class),
+            examples = @ExampleObject(value = "{\"message\":\"JOIN_FAILED\",\"success\":\"false\"}")
+    ))
     @PostMapping("/join")
     public ResponseEntity<UserJoinResponse> join(@RequestBody UserJoinRequest dto) {
 
@@ -73,6 +87,14 @@ public class AuthController {
 //        }
 //    }
 
+    @Operation(summary = "로그인")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(implementation = LoginResponse.class)
+    ))
+    @ApiResponse(responseCode = "400", description = "회원가입 실패", content = @Content(
+            schema = @Schema(implementation = LoginResponse.class),
+            examples = @ExampleObject(value = "{\"message\":\"LOGIN_FAILED\",\"success\":\"false\"}")
+    ))
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest dto) {
 

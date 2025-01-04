@@ -42,6 +42,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/test/**"),
                                 PathRequest.toH2Console()
                         ).permitAll()
+                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(config -> config.disable())
