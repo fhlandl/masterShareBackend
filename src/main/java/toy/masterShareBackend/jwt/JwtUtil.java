@@ -57,7 +57,7 @@ public class JwtUtil {
 
             return true;
         } catch (Exception e) {
-            return false;
+            throw new RuntimeException();
         }
     }
 

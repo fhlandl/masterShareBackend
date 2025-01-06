@@ -10,6 +10,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +33,15 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers(PathRequest.toH2Console())
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .requestMatchers("/swagger-ui/*", "/v3/api-docs/**")
+                .requestMatchers("/h2-console/**");
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
@@ -39,12 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/auth/v1/login"),
                                 new AntPathRequestMatcher("/auth/v1/join"),
-                                new AntPathRequestMatcher("/test/**"),
-                                PathRequest.toH2Console(),
-                                PathRequest.toStaticResources().atCommonLocations()
+                                new AntPathRequestMatcher("/test/**")
                         ).permitAll()
-                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**")
-                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(config -> config.disable())

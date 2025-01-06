@@ -22,6 +22,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final static String TOKEN_PREFIX = "Bearer ";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.startsWith("/h2-console") ||
+                requestURI.startsWith("/swagger-ui") ||
+                requestURI.startsWith("/v3/api-docs")) {
+            return true;
+        }
+
+        if (requestURI.startsWith("/auth/v1/")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
