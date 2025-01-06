@@ -10,11 +10,6 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponse {
-    @Schema(example = "true")
-    private boolean success;
-
-    @Schema(example = "LOGIN_SUCCESS")
-    private String message;
 
     private UserInfo userInfo;
 
@@ -25,9 +20,7 @@ public class LoginResponse {
     private String refreshToken;
 
     @Builder
-    public LoginResponse(boolean success, String message, UserInfo userInfo, String accessToken, String refreshToken) {
-        this.success = success;
-        this.message = message;
+    public LoginResponse(UserInfo userInfo, String accessToken, String refreshToken) {
         this.userInfo = userInfo;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;

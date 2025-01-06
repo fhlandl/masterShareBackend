@@ -40,7 +40,8 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/auth/v1/login"),
                                 new AntPathRequestMatcher("/auth/v1/join"),
                                 new AntPathRequestMatcher("/test/**"),
-                                PathRequest.toH2Console()
+                                PathRequest.toH2Console(),
+                                PathRequest.toStaticResources().atCommonLocations()
                         ).permitAll()
                         .requestMatchers("/swagger-ui/*", "/v3/api-docs/**")
                         .permitAll()

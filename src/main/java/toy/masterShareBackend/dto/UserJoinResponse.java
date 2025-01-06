@@ -10,12 +10,6 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserJoinResponse {
-    @Schema(example = "true")
-    private boolean success;
-
-    @Schema(example = "JOIN_SUCCESS")
-    private String message;
-
     private UserInfo userInfo;
 
     @Schema(example = "eyJ0eXAiOiJKV1QiL...")
@@ -25,9 +19,7 @@ public class UserJoinResponse {
     private String refreshToken;
 
     @Builder
-    public UserJoinResponse(boolean success, String message, UserInfo userInfo, String accessToken, String refreshToken) {
-        this.success = success;
-        this.message = message;
+    public UserJoinResponse(UserInfo userInfo, String accessToken, String refreshToken) {
         this.userInfo = userInfo;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;

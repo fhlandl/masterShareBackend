@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,15 +35,13 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "회원가입")
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = UserJoinResponse.class)
-    ))
+    @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "400", description = "회원가입 실패", content = @Content(
-            schema = @Schema(implementation = UserJoinResponse.class),
-            examples = @ExampleObject(value = "{\"message\":\"JOIN_FAILED\",\"success\":\"false\"}")
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":1001,\"message\":\"Join failed: invalid user info\"}}")
     ))
     @PostMapping("/join")
-    public ResponseEntity<UserJoinResponse> join(@RequestBody UserJoinRequest dto) {
+    public ResponseEntity<ResponseWrapper<UserJoinResponse>> join(@RequestBody UserJoinRequest dto) {
 
         try {
             User user = userService.join(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getNickname());
@@ -52,19 +49,17 @@ public class AuthController {
 
             UserTokenInfo userTokenInfo = authenticateAndGenerateToken(dto.getUsername(), dto.getPassword());
 
-            return ResponseEntity.ok(UserJoinResponse.builder()
-                    .success(true)
-                    .message("Join successful!")
+            UserJoinResponse userJoinResponse = UserJoinResponse.builder()
                     .userInfo(userTokenInfo.getUserInfo())
                     .accessToken(userTokenInfo.getAccessToken())
                     .refreshToken(userTokenInfo.getRefreshToken())
-                    .build()
-            );
+                    .build();
+
+            return ResponseWrapper.success(userJoinResponse);
+
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(UserJoinResponse.builder()
-                    .success(false)
-                    .message("Join failed. " + e.getMessage())
-                    .build());
+
+            return ResponseWrapper.fail(1001, "Join failed: invalid user info");
         }
     }
 
@@ -88,33 +83,27 @@ public class AuthController {
 //    }
 
     @Operation(summary = "로그인")
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = LoginResponse.class)
-    ))
-    @ApiResponse(responseCode = "400", description = "회원가입 실패", content = @Content(
-            schema = @Schema(implementation = LoginResponse.class),
-            examples = @ExampleObject(value = "{\"message\":\"LOGIN_FAILED\",\"success\":\"false\"}")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":1002,\"message\":\"Login failed: invalid username or password\"}}")
     ))
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest dto) {
+    public ResponseEntity<ResponseWrapper<LoginResponse>> login(@RequestBody LoginRequest dto) {
 
         try {
             UserTokenInfo userTokenInfo = authenticateAndGenerateToken(dto.getUsername(), dto.getPassword());
-
-            return ResponseEntity.ok(LoginResponse.builder()
-                    .success(true)
-                    .message("Login successful!")
+            LoginResponse loginResponse = LoginResponse.builder()
                     .userInfo(userTokenInfo.getUserInfo())
                     .accessToken(userTokenInfo.getAccessToken())
                     .refreshToken(userTokenInfo.getRefreshToken())
-                    .build()
-            );
+                    .build();
+
+            return ResponseWrapper.success(loginResponse);
 
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(LoginResponse.builder()
-                    .success(false)
-                    .message("Login failed: invalid username or password")
-                    .build());
+
+            return ResponseWrapper.failAuth(1002, "Login failed: invalid username or password");
         }
     }
 
