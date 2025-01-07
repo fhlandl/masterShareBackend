@@ -38,7 +38,8 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toH2Console())
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
                 .requestMatchers("/swagger-ui/*", "/v3/api-docs/**")
-                .requestMatchers("/h2-console/**");
+                .requestMatchers("/h2-console/**")
+                .requestMatchers("/error");
     }
 
     @Bean

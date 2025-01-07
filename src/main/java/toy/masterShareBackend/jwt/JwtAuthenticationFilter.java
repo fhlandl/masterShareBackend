@@ -28,7 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (requestURI.startsWith("/h2-console") ||
                 requestURI.startsWith("/swagger-ui") ||
-                requestURI.startsWith("/v3/api-docs")) {
+                requestURI.startsWith("/v3/api-docs") ||
+                requestURI.startsWith("/favicon.ico") ||
+                requestURI.startsWith("/error")) {
             return true;
         }
 
