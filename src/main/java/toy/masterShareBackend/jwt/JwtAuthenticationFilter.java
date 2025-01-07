@@ -34,7 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (requestURI.startsWith("/auth/v1/")) {
+        if (requestURI.startsWith("/auth/v1/") ||
+                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board$") ||
+                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board/messages$") ||
+                requestURI.matches("^/boards/v1/message/[a-zA-Z0-9_-]+$") ||
+                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board/message/new$")) {
+
             return true;
         }
 
