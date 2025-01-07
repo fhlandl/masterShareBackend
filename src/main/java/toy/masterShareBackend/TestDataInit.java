@@ -34,25 +34,31 @@ public class TestDataInit {
     }
 
     private void initMessages() {
-        User owner = userRepository.save(User.builder()
+        User test = userRepository.save(User.builder()
                 .username("test")
                 .password(passwordEncoder.encode("test_pw"))
                 .email("test@abc.com")
                 .nickname("test_nick")
                 .build());
 
-        User author = userRepository.save(User.builder()
+        Board newTestBoard = Board.builder()
+                .maxSize(10)
+                .build();
+        newTestBoard.setOwner(test);
+        Board testBoard = boardRepository.save(newTestBoard);
+
+        User guest = userRepository.save(User.builder()
                 .username("guest")
                 .password(passwordEncoder.encode("guest_pw"))
                 .email("guest@abc.com")
                 .nickname("guest_nick")
                 .build());
 
-        Board newBoard = Board.builder()
+        Board newGuestBoard = Board.builder()
                 .maxSize(10)
                 .build();
-        newBoard.setOwner(owner);
-        Board board = boardRepository.save(newBoard);
+        newGuestBoard.setOwner(guest);
+        Board guestBoard = boardRepository.save(newGuestBoard);
 
         String[][] messageContents = {
                 {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
@@ -81,12 +87,12 @@ public class TestDataInit {
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
             Message message = Message.builder()
-                    .sender(author.getNickname())
+                    .sender(guest.getNickname())
                     .title(msgSrc[0])
                     .content(msgSrc[1])
                     .build();
-            message.setAuthor(author);
-            message.setBoard(board);
+            message.setAuthor(guest);
+            message.setBoard(testBoard);
 
             if (openedMsgs.contains(i)) {
                 message.open();
