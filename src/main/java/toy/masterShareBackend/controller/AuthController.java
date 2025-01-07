@@ -114,8 +114,8 @@ public class AuthController {
         User user = (User) authentication.getPrincipal();
         UserInfo userInfo = new UserInfo(user.getUserId(), user.getUsername(), user.getEmail(), user.getNickname());
 
-        String accessToken = jwtUtil.generateToken(user, 10);
-        String refreshToken = jwtUtil.generateToken(user, 60);
+        String accessToken = jwtUtil.generateToken(user, 60);
+        String refreshToken = jwtUtil.generateToken(user, 60 * 24);
 
         return new UserTokenInfo(userInfo, accessToken, refreshToken);
     }
