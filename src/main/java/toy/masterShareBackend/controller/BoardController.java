@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,7 @@ public class BoardController {
     @Operation(summary = "메시지 하나 가져오기", description = "messageId를 가진 메시지를 가져옴(open 상태가 아닌 경우 오류 발생)")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
     ))
     @GetMapping("/message/{messageId}")
     public ResponseEntity<ResponseWrapper<MessageDto>> getMessage(
@@ -69,10 +70,10 @@ public class BoardController {
         }
     }
 
-    @Operation(summary = "메시지 열기", description = "messageId를 가진 메시지의 open 상태를 true로 변경")
+    @Operation(summary = "메시지 열기", description = "messageId를 가진 메시지의 open 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
     ))
     @PatchMapping("/message/open/{messageId}")
     public ResponseEntity<ResponseWrapper<MessageDto>> openMessage(
@@ -97,7 +98,7 @@ public class BoardController {
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "메시지 삭제", description = "messageId를 가진 메시지의 deleted 상태를 true로 변경")
+    @Operation(summary = "메시지 삭제", description = "messageId를 가진 메시지의 deleted 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples= @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\"},\"error\":null}")
