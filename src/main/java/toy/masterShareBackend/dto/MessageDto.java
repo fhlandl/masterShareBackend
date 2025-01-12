@@ -25,7 +25,7 @@ public class MessageDto {
     private String content;
 
     @Schema(example = "false")
-    private boolean opened;
+    private Boolean opened;
 
     @Schema(example = "2024.12.19 21:45")
     private String createdAt;

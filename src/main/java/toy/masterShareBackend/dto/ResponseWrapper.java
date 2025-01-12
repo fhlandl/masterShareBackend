@@ -51,4 +51,12 @@ public class ResponseWrapper<T> {
                 .error(new ErrorInfo(code, message))
                 .build());
     }
+
+    public static <T> ResponseWrapper<T> failInterceptorAuth(int code, String message) {
+        return ResponseWrapper.<T>builder()
+                .success(false)
+                .data(null)
+                .error(new ErrorInfo(code, message))
+                .build();
+    }
 }
