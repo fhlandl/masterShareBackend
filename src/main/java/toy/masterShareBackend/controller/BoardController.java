@@ -75,6 +75,10 @@ public class BoardController {
             schema = @Schema(implementation = ResponseWrapper.class),
             examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
     ))
+    @ApiResponse(responseCode = "403", content = @Content(
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":4321,\"message\":\"Message access denied\"}}")
+    ))
     @PatchMapping("/message/open/{messageId}")
     public ResponseEntity<ResponseWrapper<MessageDto>> openMessage(
             @Parameter(example = "MH5tjB2yoshlnMDDbPdM")
@@ -102,6 +106,10 @@ public class BoardController {
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples= @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\"},\"error\":null}")
+    ))
+    @ApiResponse(responseCode = "403", content = @Content(
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":4321,\"message\":\"Message access denied\"}}")
     ))
     @PatchMapping("/message/delete/{messageId}")
     public ResponseEntity<ResponseWrapper<MessageDto>> deleteMessage(
