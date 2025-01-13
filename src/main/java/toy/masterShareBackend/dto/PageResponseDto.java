@@ -31,7 +31,7 @@ public class PageResponseDto<E> {
 
         int end = (int) (Math.ceil(pageRequest.getPage() / (double) PAGE_LEN)) * PAGE_LEN;
         int start = end - PAGE_LEN + 1;
-        int last = (int) (Math.ceil((totalDataCount / (double) pageRequest.getSize())));
+        int last = Math.max((int) (Math.ceil((totalDataCount / (double) pageRequest.getSize()))), 1);
         if (end > last) {
             end = last;
         }
