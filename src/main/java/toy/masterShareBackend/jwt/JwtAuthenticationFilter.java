@@ -1,17 +1,22 @@
 package toy.masterShareBackend.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import toy.masterShareBackend.dto.ResponseWrapper;
 
 import java.io.IOException;
+import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (requestURI.startsWith("/auth/v1/") ||
+                requestURI.startsWith("/auth/v1/token/refresh") ||
                 requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board$") ||
                 requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board/messages$") ||
                 requestURI.matches("^/boards/v1/message/[a-zA-Z0-9_-]+$") ||
@@ -50,14 +56,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
-        String accessToken = getAccessToken(authorizationHeader);
 
-        if (jwtUtil.validateToken(accessToken)) {
-            Authentication authentication = jwtUtil.getAuthentication(accessToken);
+        try {
+            String accessToken = getAccessToken(authorizationHeader);
+
+            Map<String, Object> claims = jwtUtil.validateToken(accessToken);
+            Authentication authentication = jwtUtil.getAuthentication(claims);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            log.error("INVALID_ACCESS_TOKEN");
+            log.error(e.getMessage());
+
+            ResponseWrapper<Object> responseDto = ResponseWrapper.failResponse(1111, "INVALID_ACCESS_TOKEN");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(responseDto));
         }
 
-        filterChain.doFilter(request, response);
     }
 
     private String getAccessToken(String authorizationHeader) {

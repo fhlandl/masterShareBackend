@@ -21,7 +21,8 @@ public class ResponseWrapper<T> {
             LoginResponse.class,
             MessageDto.class,
             PageResponseDto.class,
-            BoardResponse.class
+            BoardResponse.class,
+            TokenRefreshResponse.class
     })
     private T data;
 
@@ -52,7 +53,7 @@ public class ResponseWrapper<T> {
                 .build());
     }
 
-    public static <T> ResponseWrapper<T> failInterceptorAuth(int code, String message) {
+    public static <T> ResponseWrapper<T> failResponse(int code, String message) {
         return ResponseWrapper.<T>builder()
                 .success(false)
                 .data(null)

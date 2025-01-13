@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/auth/v1/login"),
                                 new AntPathRequestMatcher("/auth/v1/join"),
+                                new AntPathRequestMatcher("/auth/v1/token/refresh"),
                                 new AntPathRequestMatcher("/test/**"),
                                 new AntPathRequestMatcher("/boards/v1/*/board"),
                                 new AntPathRequestMatcher("/boards/v1/*/board/messages"),

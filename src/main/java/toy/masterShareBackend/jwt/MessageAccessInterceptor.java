@@ -39,7 +39,7 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
         if (!hasAccess) {
             log.info("Message access denied");
 
-            ResponseWrapper<?> responseDto = ResponseWrapper.failInterceptorAuth(4321, "Message access denied");
+            ResponseWrapper<?> responseDto = ResponseWrapper.failResponse(4321, "Message access denied");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write(new ObjectMapper().writeValueAsString(responseDto));
