@@ -31,11 +31,11 @@ public class TestController {
         return new TestResponse("Post Connection Test", content);
     }
 
-    @ApiResponse(content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "MH5tjB2yoshlnMDDbPdM")))
-    @GetMapping("/uniqueid")
-    public String uniqueId() {
-        return IdUtil.generateUniqueId();
-    }
+//    @ApiResponse(content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "MH5tjB2yoshlnMDDbPdM")))
+//    @GetMapping("/uniqueid")
+//    public String uniqueId() {
+//        return IdUtil.generateUniqueId();
+//    }
 
     @AllArgsConstructor
     @Getter
