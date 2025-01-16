@@ -13,7 +13,7 @@ import lombok.Getter;
 public class MessageDto {
 
     @Schema(example = "MH5tjB2yoshlnMDDbPdM")
-    private String messageId;
+    private String messageKey;
 
     @Schema(example = "트리티티")
     private String sender;

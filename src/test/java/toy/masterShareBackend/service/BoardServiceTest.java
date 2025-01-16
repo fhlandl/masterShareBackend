@@ -78,7 +78,7 @@ class BoardServiceTest {
         Board board = createBoard(owner, 10);
 
         // when
-        BoardResponse response = boardService.findBoard(owner.getUserId());
+        BoardResponse response = boardService.findBoard(owner.getUserKey());
 
         // then
         assertThat(response.getUsername()).isEqualTo(owner.getUsername());
@@ -123,7 +123,7 @@ class BoardServiceTest {
         // when
         int pageNum = 2;
         int pageSize= 5;
-        PageResponseDto<MessageDto> response = boardService.findMessageList(owner.getUserId(), new PageRequestDto(pageNum, pageSize));
+        PageResponseDto<MessageDto> response = boardService.findMessageList(owner.getUserKey(), new PageRequestDto(pageNum, pageSize));
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {
@@ -176,7 +176,7 @@ class BoardServiceTest {
         // when
         int pageNum = 1;
         int pageSize= 5;
-        PageResponseDto<MessageDto> response = boardService.findOpenedMessageList(board.getBoardId(), new PageRequestDto(pageNum, pageSize));
+        PageResponseDto<MessageDto> response = boardService.findOpenedMessageList(board.getBoardKey(), new PageRequestDto(pageNum, pageSize));
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {
@@ -207,7 +207,7 @@ class BoardServiceTest {
         Message message = createMessage(board, author, sender, title, content, true);
 
         // when
-        MessageDto messageDto = boardService.readMessage(message.getMessageId());
+        MessageDto messageDto = boardService.readMessage(message.getMessageKey());
 
         // then
         assertThat(messageDto.getSender()).isEqualTo(sender);
@@ -231,7 +231,7 @@ class BoardServiceTest {
 
         // when, then
         assertThatThrownBy(() -> {
-            boardService.readMessage(message.getMessageId());
+            boardService.readMessage(message.getMessageKey());
         });
     }
 
@@ -249,7 +249,7 @@ class BoardServiceTest {
         Message message = createMessage(board, author, sender, title, content, false);
 
         // when
-        MessageDto messageDto = boardService.openMessage(message.getMessageId());
+        MessageDto messageDto = boardService.openMessage(message.getMessageKey());
 
         // then
         assertThat(messageDto.getSender()).isEqualTo(sender);
@@ -269,10 +269,10 @@ class BoardServiceTest {
         String content = "내용";
 
         // when
-        MessageDto messageDto = boardService.createMessage(owner.getUserId(), sender, title, content);
+        MessageDto messageDto = boardService.createMessage(owner.getUserKey(), sender, title, content);
 
         // then
-        log.info("Message {} created - {}", messageDto.getMessageId(), messageDto.getCreatedAt());
+        log.info("Message {} created - {}", messageDto.getMessageKey(), messageDto.getCreatedAt());
         assertThat(messageDto.getSender()).isEqualTo(sender);
         assertThat(messageDto.getTitle()).isEqualTo(title);
         assertThat(messageDto.getContent()).isNull();
@@ -292,7 +292,7 @@ class BoardServiceTest {
         Message message = createMessage(board, null, sender, title, content, false);
 
         // when
-        boardService.deleteMessage(message.getMessageId());
+        boardService.deleteMessage(message.getMessageKey());
 
         // then
         Message foundMessage = messageRepository.findById(message.getId()).get();

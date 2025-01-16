@@ -9,7 +9,7 @@ import lombok.Getter;
 public class UserInfo {
 
   @Schema(example = "9fcU9rdGc-wDQ74GiOnc")
-  private String userId;
+  private String userKey;
 
   @Schema(example = "test1234")
   private String username;

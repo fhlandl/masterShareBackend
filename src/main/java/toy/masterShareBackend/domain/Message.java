@@ -16,10 +16,11 @@ public class Message {
 
     @Id
     @GeneratedValue
+    @Column(name = "message_id")
     private Long id;
 
-    @Column(name = "message_id", nullable = false, unique = true)
-    private String messageId = IdUtil.generateUniqueId();
+    @Column(name = "message_key", nullable = false, unique = true)
+    private String messageKey = IdUtil.generateUniqueId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)

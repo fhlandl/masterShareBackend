@@ -42,8 +42,8 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public BoardResponse findBoard(String userId) {
-        User user = userRepository.findByUserId(userId).orElseThrow();
+    public BoardResponse findBoard(String userKey) {
+        User user = userRepository.findByUserKey(userKey).orElseThrow();
         Board board = user.getBoards().stream()
                 .findFirst()
                 .get();
@@ -56,9 +56,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findMessageList(String userId, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findMessageList(String userKey, PageRequestDto pageRequestDto) {
 
-        User user = userRepository.findByUserId(userId).orElseThrow();
+        User user = userRepository.findByUserKey(userKey).orElseThrow();
         Board board = user.getBoards().stream()
                 .findFirst()
                 .get();
@@ -81,9 +81,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findOpenedMessageList(String boardId, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findOpenedMessageList(String boardKey, PageRequestDto pageRequestDto) {
 
-        Board board = boardRepository.findByBoardId(boardId).orElseThrow();
+        Board board = boardRepository.findByBoardKey(boardKey).orElseThrow();
 
         PageRequest pageable = PageRequest.of(
                 pageRequestDto.getPage() - 1,
@@ -103,9 +103,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public MessageDto readMessage(String messageId) {
+    public MessageDto readMessage(String messageKey) {
 
-        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
         if (!message.isOpened()) {
             throw new RuntimeException("Message has not been opened yet");
         }
@@ -113,9 +113,9 @@ public class BoardService {
         return convertMessageToMessageDto(message, true);
     }
 
-    public MessageDto openMessage(String messageId) {
+    public MessageDto openMessage(String messageKey) {
 
-        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
         message.open();
 
         return convertMessageToMessageDto(message, true);
@@ -123,7 +123,7 @@ public class BoardService {
 
     public MessageDto createMessage(String ownerId, String sender, String title, String content) {
 
-        User owner = userRepository.findByUserId(ownerId).orElseThrow();
+        User owner = userRepository.findByUserKey(ownerId).orElseThrow();
         Board board = owner.getBoards().stream()
                 .findFirst()
                 .get();
@@ -140,15 +140,15 @@ public class BoardService {
         return convertMessageToMessageDto(message, false);
     }
 
-    public void deleteMessage(String messageId) {
-        Message message = messageRepository.findByMessageId(messageId).orElseThrow();
+    public void deleteMessage(String messageKey) {
+        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
         message.delete();
     }
 
     private MessageDto convertMessageToMessageDto(Message message, boolean includeContent) {
         String content = includeContent ? message.getContent() : null;
         return MessageDto.builder()
-                .messageId(message.getMessageId())
+                .messageKey(message.getMessageKey())
                 .sender(message.getSender())
                 .title(message.getTitle())
                 .content(content)

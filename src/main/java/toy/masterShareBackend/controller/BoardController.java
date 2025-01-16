@@ -22,62 +22,62 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @Operation(summary = "게시판 가져오기", description = "userId를 가진 회원의 게시판 정보를 가져옴")
+    @Operation(summary = "게시판 가져오기", description = "userKey를 가진 회원의 게시판 정보를 가져옴")
     @ApiResponse(responseCode = "200")
-    @GetMapping("/{userId}/board")
+    @GetMapping("/{userKey}/board")
     public ResponseEntity<ResponseWrapper<BoardResponse>> board(
             @Parameter(example = "9fcU9rdGc-wDQ74GiOnc")
-            @PathVariable String userId) {
+            @PathVariable String userKey) {
 
-        BoardResponse boardResponse = boardService.findBoard(userId);
+        BoardResponse boardResponse = boardService.findBoard(userKey);
 
         return ResponseWrapper.success(boardResponse);
     }
 
-    @Operation(summary = "메시지 목록 가져오기", description = "userId를 가진 회원의 메시지 목록을 가져옴(내용은 포함하지 않음)")
+    @Operation(summary = "메시지 목록 가져오기", description = "userKey를 가진 회원의 메시지 목록을 가져옴(내용은 포함하지 않음)")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\",\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageKey\":\"MH5tjB2yoshlnMDDbPdM\",\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
     ))
-    @GetMapping("/{userId}/board/messages")
+    @GetMapping("/{userKey}/board/messages")
     public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> messages(
             @Parameter(example = "9fcU9rdGc-wDQ74GiOnc")
-            @PathVariable String userId,
+            @PathVariable String userKey,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<MessageDto> messageList = boardService.findMessageList(userId, pageRequestDto);
+        PageResponseDto<MessageDto> messageList = boardService.findMessageList(userKey, pageRequestDto);
 
         return ResponseWrapper.success(messageList);
     }
 
-    @Operation(summary = "열린 메시지 목록 가져오기", description = "boardId를 가진 게시판의 열린 메시지 목록을 가져옴(내용 포함)")
+    @Operation(summary = "열린 메시지 목록 가져오기", description = "boardKey를 가진 게시판의 열린 메시지 목록을 가져옴(내용 포함)")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\",\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"메시지 내용\",\"opened\":true,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageKey\":\"MH5tjB2yoshlnMDDbPdM\",\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"메시지 내용\",\"opened\":true,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
     ))
-    @GetMapping("/board/{boardId}/messages/opened")
+    @GetMapping("/board/{boardKey}/messages/opened")
     public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> readOpenedMessages(
             @Parameter(example = "9fcU9rdGc-wDQ74GiOnc")
-            @PathVariable String boardId,
+            @PathVariable String boardKey,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<MessageDto> messageList = boardService.findOpenedMessageList(boardId, pageRequestDto);
+        PageResponseDto<MessageDto> messageList = boardService.findOpenedMessageList(boardKey, pageRequestDto);
 
         return ResponseWrapper.success(messageList);
     }
 
-    @Operation(summary = "메시지 하나 가져오기", description = "messageId를 가진 메시지를 가져옴(open 상태가 아닌 경우 오류 발생)")
+    @Operation(summary = "메시지 하나 가져오기", description = "messageKey를 가진 메시지를 가져옴(open 상태가 아닌 경우 오류 발생)")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageKey\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
     ))
-    @GetMapping("/message/{messageId}")
+    @GetMapping("/message/{messageKey}")
     public ResponseEntity<ResponseWrapper<MessageDto>> getMessage(
             @Parameter(example = "MH5tjB2yoshlnMDDbPdM")
-            @PathVariable String messageId) {
+            @PathVariable String messageKey) {
 
         try {
-            MessageDto messageDto = boardService.readMessage(messageId);
+            MessageDto messageDto = boardService.readMessage(messageKey);
             return ResponseWrapper.success(messageDto);
 
         } catch (RuntimeException e) {
@@ -86,55 +86,55 @@ public class BoardController {
         }
     }
 
-    @Operation(summary = "메시지 열기", description = "messageId를 가진 메시지의 open 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "메시지 열기", description = "messageKey를 가진 메시지의 open 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageKey\": \"MH5tjB2yoshlnMDDbPdM\",\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
     ))
     @ApiResponse(responseCode = "403", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":4321,\"message\":\"Message access denied\"}}")
     ))
-    @PatchMapping("/message/open/{messageId}")
+    @PatchMapping("/message/open/{messageKey}")
     public ResponseEntity<ResponseWrapper<MessageDto>> openMessage(
             @Parameter(example = "MH5tjB2yoshlnMDDbPdM")
-            @PathVariable String messageId) {
+            @PathVariable String messageKey) {
 
-        MessageDto messageDto = boardService.openMessage(messageId);
+        MessageDto messageDto = boardService.openMessage(messageKey);
 
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "메시지 생성", description = "userId를 가진 회원의 게시판에 메시지를 생성함")
+    @Operation(summary = "메시지 생성", description = "userKey를 가진 회원의 게시판에 메시지를 생성함")
     @ApiResponse(responseCode = "200")
-    @PostMapping("/{userId}/board/message/new")
+    @PostMapping("/{userKey}/board/message/new")
     public ResponseEntity<ResponseWrapper<MessageDto>> createMessage(
-            @Parameter(description = "게시판 소유자의 userId", example = "9fcU9rdGc-wDQ74GiOnc")
-            @PathVariable String userId,
+            @Parameter(description = "게시판 소유자의 userKey", example = "9fcU9rdGc-wDQ74GiOnc")
+            @PathVariable String userKey,
             @RequestBody CreateMessageRequest dto) {
 
-        MessageDto messageDto = boardService.createMessage(userId, dto.getSender(), dto.getTitle(), dto.getContent());
+        MessageDto messageDto = boardService.createMessage(userKey, dto.getSender(), dto.getTitle(), dto.getContent());
 
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "메시지 삭제", description = "messageId를 가진 메시지의 deleted 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "메시지 삭제", description = "messageKey를 가진 메시지의 deleted 상태를 true로 변경", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples= @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\"},\"error\":null}")
+            examples= @ExampleObject(value = "{\"success\":true,\"data\":{\"messageKey\":\"MH5tjB2yoshlnMDDbPdM\"},\"error\":null}")
     ))
     @ApiResponse(responseCode = "403", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":4321,\"message\":\"Message access denied\"}}")
     ))
-    @PatchMapping("/message/delete/{messageId}")
+    @PatchMapping("/message/delete/{messageKey}")
     public ResponseEntity<ResponseWrapper<MessageDto>> deleteMessage(
             @Parameter(example = "MH5tjB2yoshlnMDDbPdM")
-            @PathVariable String messageId) {
+            @PathVariable String messageKey) {
 
-        boardService.deleteMessage(messageId);
+        boardService.deleteMessage(messageKey);
         return ResponseWrapper.success(MessageDto.builder()
-                .messageId(messageId)
+                .messageKey(messageKey)
                 .build());
     }
 

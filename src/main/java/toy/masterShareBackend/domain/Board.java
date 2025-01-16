@@ -17,10 +17,11 @@ public class Board {
 
     @Id
     @GeneratedValue
+    @Column(name = "board_id")
     private Long id;
 
-    @Column(name = "board_id", nullable = false, unique = true)
-    private String boardId = IdUtil.generateUniqueId();
+    @Column(name = "board_key", nullable = false, unique = true)
+    private String boardKey = IdUtil.generateUniqueId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)

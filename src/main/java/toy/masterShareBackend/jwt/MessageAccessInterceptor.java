@@ -27,12 +27,12 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
         log.info("Check url for message access: {}", requestURI);
 
         String[] urlArr = requestURI.split("/");
-        String messageId = urlArr[urlArr.length - 1];
+        String messageKey = urlArr[urlArr.length - 1];
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        Boolean hasAccess = messageRepository.findByMessageIdWithBoardOwner(messageId)
+        Boolean hasAccess = messageRepository.findByMessageKeyWithBoardOwner(messageKey)
                 .map(message -> message.getBoard().getOwner().getUsername().equals(username))
                 .orElse(false);
 

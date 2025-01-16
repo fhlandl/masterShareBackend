@@ -20,10 +20,11 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private String userId = IdUtil.generateUniqueId();
+    @Column(name = "user_key", nullable = false, unique = true)
+    private String userKey = IdUtil.generateUniqueId();
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -85,7 +86,7 @@ public class User implements UserDetails {
 
     public Map<String, Object> toClaims() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
+        claims.put("userKey", userKey);
         claims.put("username", username);
         claims.put("password", password);
         claims.put("email", email);

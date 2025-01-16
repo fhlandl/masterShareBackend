@@ -16,7 +16,7 @@ public class BoardResponse {
     private String nickname;
 
     @Schema()
-    private String boardId;
+    private String boardKey;
 
     @Schema(example = "10")
     private Integer maxSize;
