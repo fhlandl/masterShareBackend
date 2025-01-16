@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import toy.masterShareBackend.util.IdUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,9 @@ public class Board {
     @Id
     @GeneratedValue
     private Long id;
+
+    @Column(name = "board_id", nullable = false, unique = true)
+    private String boardId = IdUtil.generateUniqueId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)

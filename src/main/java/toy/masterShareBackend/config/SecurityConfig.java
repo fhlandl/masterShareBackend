@@ -54,6 +54,7 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/test/**"),
                                 new AntPathRequestMatcher("/boards/v1/*/board"),
                                 new AntPathRequestMatcher("/boards/v1/*/board/messages"),
+                                new AntPathRequestMatcher("/boards/v1/board/*/messages/opened"),
                                 new AntPathRequestMatcher("/boards/v1/message/*"),
                                 new AntPathRequestMatcher("/boards/v1/*/board/message/new")
                         ).permitAll()

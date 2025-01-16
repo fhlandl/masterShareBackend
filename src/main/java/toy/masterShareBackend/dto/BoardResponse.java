@@ -15,6 +15,9 @@ public class BoardResponse {
     @Schema(example = "트리티티")
     private String nickname;
 
+    @Schema()
+    private String boardId;
+
     @Schema(example = "10")
     private Integer maxSize;
     // ToDo: 기타 설정값들 추가

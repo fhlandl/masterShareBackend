@@ -50,6 +50,22 @@ public class BoardController {
         return ResponseWrapper.success(messageList);
     }
 
+    @Operation(summary = "열린 메시지 목록 가져오기", description = "boardId를 가진 게시판의 열린 메시지 목록을 가져옴(내용 포함)")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":\"MH5tjB2yoshlnMDDbPdM\",\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"메시지 내용\",\"opened\":true,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
+    ))
+    @GetMapping("/board/{boardId}/messages/opened")
+    public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> readOpenedMessages(
+            @Parameter(example = "9fcU9rdGc-wDQ74GiOnc")
+            @PathVariable String boardId,
+            @ModelAttribute PageRequestDto pageRequestDto) {
+
+        PageResponseDto<MessageDto> messageList = boardService.findOpenedMessageList(boardId, pageRequestDto);
+
+        return ResponseWrapper.success(messageList);
+    }
+
     @Operation(summary = "메시지 하나 가져오기", description = "messageId를 가진 메시지를 가져옴(open 상태가 아닌 경우 오류 발생)")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),

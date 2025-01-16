@@ -81,6 +81,28 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponseDto<MessageDto> findOpenedMessageList(String boardId, PageRequestDto pageRequestDto) {
+
+        Board board = boardRepository.findByBoardId(boardId).orElseThrow();
+
+        PageRequest pageable = PageRequest.of(
+                pageRequestDto.getPage() - 1,
+                pageRequestDto.getSize(),
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Message> result = messageRepository.findByBoardIdAndDeletedFalseAndOpenedTrue(board.getId(), pageable);
+        List<MessageDto> dtoList = result.getContent().stream()
+                .map(msg -> convertMessageToMessageDto(msg, true))
+                .collect(Collectors.toList());
+
+        long totalCount = result.getTotalElements();
+
+        PageResponseDto pageResponseDto = new PageResponseDto(dtoList, pageRequestDto, totalCount);
+        return pageResponseDto;
+    }
+
+    @Transactional(readOnly = true)
     public MessageDto readMessage(String messageId) {
 
         Message message = messageRepository.findByMessageId(messageId).orElseThrow();

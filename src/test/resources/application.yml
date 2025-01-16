@@ -14,3 +14,6 @@ logging:
       hibernate:
         SQL: debug
         orm.jdbc.bind: TRACE
+
+jwt:
+  secret_key: master-share-jwt-secret-master-share-jwt-secret
