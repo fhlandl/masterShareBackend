@@ -33,3 +33,51 @@ jwt:
 springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/msdb
+    driver-class-name: org.postgresql.Driver
+    username: master_share
+    password: master_share
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate                              # 운영에서는 스키마를 수정하지 않도록 설정
+    properties:
+      hibernate:
+        format_sql: false                             # 운영 환경에서는 SQL 포맷팅 비활성화
+        use_sql_comments: false                       # SQL 주석 비활성화
+        generate_statistics: false                    # 통계 생성을 비활성화하여 성능 최적화
+
+  h2:
+    console:
+      enabled: false                                  # H2 콘솔 비활성화 (운영에서는 사용하지 않음)
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: warn                                     # SQL 로그를 WARN으로 조정
+        orm.jdbc.bind: off                            # 바인딩 로그 비활성화
+      springframework:
+        security:
+          web: debug                                   # Spring Security 로그를 WARN으로 조정
+
+jwt:
+  secret_key: ${JWT_SECRET_KEY}        # 비밀 키를 환경 변수로 관리 (디폴트 제거)

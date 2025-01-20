@@ -18,7 +18,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Profile("!test")
+@Profile("default")
 public class TestDataInit {
 
     private final UserRepository userRepository;
