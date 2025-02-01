@@ -88,7 +88,6 @@ public class User implements UserDetails {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userKey", userKey);
         claims.put("username", username);
-        claims.put("password", password);
         claims.put("email", email);
         claims.put("nickname", nickname);
         claims.put("roles", getAuthorities());
