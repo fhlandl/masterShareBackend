@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/v1")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final UserService userService;
@@ -117,7 +117,7 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(username, password)
         );
         User user = (User) authentication.getPrincipal();
-        UserInfo userInfo = new UserInfo(user.getUserKey(), user.getUsername(), user.getEmail(), user.getNickname());
+        UserInfo userInfo = new UserInfo(user.getId(), user.getUsername(), user.getEmail(), user.getNickname());
 
         String accessToken = jwtUtil.generateAccessToken(user.toClaims());
         String refreshToken = jwtUtil.generateRefreshToken(user.toClaims());

@@ -21,21 +21,17 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         String requestURI = request.getRequestURI();
-
         log.info("Check url for message access: {}", requestURI);
 
         String[] urlArr = requestURI.split("/");
-        String messageKey = urlArr[urlArr.length - 1];
+        long messageId = Long.parseLong(urlArr[urlArr.length - 1]);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        if (shouldNotIntercept(request, messageId)) {
+            return true;
+        }
 
-        Boolean hasAccess = messageRepository.findByMessageKeyWithBoardOwner(messageKey)
-                .map(message -> message.getBoard().getOwner().getUsername().equals(username))
-                .orElse(false);
-
+        boolean hasAccess = checkMessageAuthorization(messageId);
         if (!hasAccess) {
             log.info("Message access denied");
 
@@ -47,5 +43,35 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
         }
 
         return true;
+    }
+
+    private boolean checkMessageAuthorization(long messageId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        log.info("************* username:{}", username);
+
+        Boolean hasAccess = messageRepository.findByIdWithBoardOwner(messageId)
+                .map(message -> message.getBoard().getOwner().getUsername().equals(username))
+                .orElse(false);
+
+        return hasAccess;
+    }
+
+    private boolean shouldNotIntercept(HttpServletRequest request, long messageId) {
+        // 메시지 하나 가져오기
+        if ("GET".equals(request.getMethod())) {
+            if ("true".equals(request.getParameter("deleted"))) {
+                return false;
+            }
+            Boolean isDeleted = messageRepository.findById(messageId)
+                    .map(message -> message.isDeleted())
+                    .orElse(false);
+
+            return !isDeleted;
+        }
+
+        // 메시지 업데이트
+        return false;
     }
 }

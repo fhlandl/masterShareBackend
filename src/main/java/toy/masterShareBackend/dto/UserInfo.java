@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public class UserInfo {
 
-  @Schema(example = "9fcU9rdGc-wDQ74GiOnc")
-  private String userKey;
+  @Schema(example = "1111")
+  private Long userId;
 
   @Schema(example = "test1234")
   private String username;

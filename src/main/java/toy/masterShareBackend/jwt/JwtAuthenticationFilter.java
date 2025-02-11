@@ -31,6 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
+        // 인증 필요
+        if (requestURI.matches("^/api/v1/users/[0-9]+/boards$")) {
+            return false;
+        }
+
         if (requestURI.startsWith("/h2-console") ||
                 requestURI.startsWith("/swagger-ui") ||
                 requestURI.startsWith("/v3/api-docs") ||
@@ -39,14 +44,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (requestURI.startsWith("/auth/v1/") ||
-                requestURI.startsWith("/test") ||
-                requestURI.startsWith("/auth/v1/token/refresh") ||
-                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board$") ||
-                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board/messages$") ||
-                requestURI.matches("^/boards/v1/board/[a-zA-Z0-9_-]+/messages/opened$") ||
-                requestURI.matches("^/boards/v1/message/[a-zA-Z0-9_-]+$") ||
-                requestURI.matches("^/boards/v1/[a-zA-Z0-9_-]+/board/message/new$")) {
+        if (requestURI.startsWith("/api/v1/auth/") ||
+                requestURI.startsWith("/api/v1/test")) {
+
+            return true;
+        }
+
+        if (requestURI.matches("^/api/v1/messages/[0-9]+$")) {
+            // 메시지 업데이트(인증 필요)
+            if ("PUT".equals(request.getMethod())) {
+                return false;
+            }
+
+            // 메시지 하나 가져오기
+            return true;
+        }
+
+        if (requestURI.matches("^/api/v1/boards/[a-zA-Z0-9_-]+/messages$")) {
+            // 메시지 생성
+            if ("POST".equals(request.getMethod())) {
+                return true;
+            }
+
+            // 메시지 목록 가져오기
+            if ("true".equals(request.getParameter("deleted"))) {
+                return false;
+            }
 
             return true;
         }

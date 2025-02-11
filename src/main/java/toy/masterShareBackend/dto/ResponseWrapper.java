@@ -21,7 +21,7 @@ public class ResponseWrapper<T> {
             LoginResponse.class,
             MessageDto.class,
             PageResponseDto.class,
-            BoardResponse.class,
+            UserBoardsResponse.class,
             TokenRefreshResponse.class
     })
     private T data;

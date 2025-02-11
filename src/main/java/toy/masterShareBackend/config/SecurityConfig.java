@@ -47,15 +47,12 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequest -> authorizeRequest
                         .requestMatchers(
-                                new AntPathRequestMatcher("/auth/v1/login"),
-                                new AntPathRequestMatcher("/auth/v1/join"),
-                                new AntPathRequestMatcher("/auth/v1/token/refresh"),
-                                new AntPathRequestMatcher("/test/**"),
-                                new AntPathRequestMatcher("/boards/v1/*/board"),
-                                new AntPathRequestMatcher("/boards/v1/*/board/messages"),
-                                new AntPathRequestMatcher("/boards/v1/board/*/messages/opened"),
-                                new AntPathRequestMatcher("/boards/v1/message/*"),
-                                new AntPathRequestMatcher("/boards/v1/*/board/message/new")
+                                new AntPathRequestMatcher("/api/v1/auth/login"),
+                                new AntPathRequestMatcher("/api/v1/auth/join"),
+                                new AntPathRequestMatcher("/api/v1/auth/token/refresh"),
+                                new AntPathRequestMatcher("/api/v1/test/*"),
+                                new AntPathRequestMatcher("/api/v1/boards/*/messages"),
+                                new AntPathRequestMatcher("/api/v1/messages/*")
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

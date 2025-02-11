@@ -15,7 +15,7 @@ import toy.masterShareBackend.util.IdUtil;
 
 @Tag(name = "Test API", description = "API 호출 테스트용")
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/api/v1/test")
 public class TestController {
 
     @GetMapping("/connect")

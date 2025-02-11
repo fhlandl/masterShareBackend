@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import toy.masterShareBackend.util.IdUtil;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -22,9 +21,6 @@ public class User implements UserDetails {
     @GeneratedValue
     @Column(name = "user_id")
     private Long id;
-
-    @Column(name = "user_key", nullable = false, unique = true)
-    private String userKey = IdUtil.generateUniqueId();
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -86,7 +82,7 @@ public class User implements UserDetails {
 
     public Map<String, Object> toClaims() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userKey", userKey);
+        claims.put("userId", id);
         claims.put("username", username);
         claims.put("email", email);
         claims.put("nickname", nickname);

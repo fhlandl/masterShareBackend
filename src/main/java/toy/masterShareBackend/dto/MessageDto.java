@@ -12,8 +12,8 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MessageDto {
 
-    @Schema(example = "MH5tjB2yoshlnMDDbPdM")
-    private String messageKey;
+    @Schema(example = "1111")
+    private Long messageId;
 
     @Schema(example = "트리티티")
     private String sender;
@@ -26,6 +26,9 @@ public class MessageDto {
 
     @Schema(example = "false")
     private boolean opened;
+
+    @Schema(example = "false")
+    private boolean deleted;
 
     @Schema(example = "2024.12.19 21:45")
     private String createdAt;

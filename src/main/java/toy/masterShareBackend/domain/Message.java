@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import toy.masterShareBackend.util.IdUtil;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -18,9 +18,6 @@ public class Message {
     @GeneratedValue
     @Column(name = "message_id")
     private Long id;
-
-    @Column(name = "message_key", nullable = false, unique = true)
-    private String messageKey = IdUtil.generateUniqueId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
@@ -45,6 +42,7 @@ public class Message {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Setter
     @Column(name = "last_modified_at")
     private LocalDateTime lastModifiedAt;
 

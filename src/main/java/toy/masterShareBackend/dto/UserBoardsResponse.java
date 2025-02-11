@@ -5,9 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-public class BoardResponse {
+public class UserBoardsResponse {
 
     @Schema(example = "test1234")
     private String username;
@@ -15,17 +17,12 @@ public class BoardResponse {
     @Schema(example = "트리티티")
     private String nickname;
 
-    @Schema()
-    private String boardKey;
-
-    @Schema(example = "10")
-    private Integer maxSize;
-    // ToDo: 기타 설정값들 추가
+    private List<BoardDto> boards;
 
     @Builder
-    public BoardResponse(String username, String nickname, int maxSize) {
+    public UserBoardsResponse(String username, String nickname, List<BoardDto> boards) {
         this.username = username;
         this.nickname = nickname;
-        this.maxSize = maxSize;
+        this.boards = boards;
     }
 }

@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import toy.masterShareBackend.jwt.BoardAccessInterceptor;
 import toy.masterShareBackend.jwt.MessageAccessInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
+    private final BoardAccessInterceptor boardAccessInterceptor;
 
     private final MessageAccessInterceptor messageAccessInterceptor;
 
@@ -23,7 +26,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
+        registry.addInterceptor(boardAccessInterceptor)
+                .addPathPatterns("/api/v1/users/*/boards");
+
         registry.addInterceptor(messageAccessInterceptor)
-                .addPathPatterns("/boards/v1/message/open/**", "/boards/v1/message/delete/**");
+                .addPathPatterns("/api/v1/messages/*");
     }
 }

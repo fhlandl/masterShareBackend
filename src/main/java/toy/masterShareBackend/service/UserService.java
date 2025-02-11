@@ -18,6 +18,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public User join(String username, String password, String email, String nickname) {
+        validateIllegalUsername(username);
         validateDuplicateUsername(username);
 
         User user = User.builder()
@@ -30,10 +31,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    private void validateIllegalUsername(String username) {
+        if (username.equals("anonymousUser")) {
+            throw new IllegalArgumentException("Illegal user name");
+        }
+    }
+
     private void validateDuplicateUsername(String username) {
         Optional<User> findUser = userRepository.findByUsername(username);
         if (findUser.isPresent()) {
-            throw new IllegalStateException("User name duplicated");
+            throw new IllegalArgumentException("User name duplicated");
         }
     }
 

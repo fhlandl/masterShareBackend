@@ -10,14 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
-import toy.masterShareBackend.dto.BoardResponse;
-import toy.masterShareBackend.dto.MessageDto;
-import toy.masterShareBackend.dto.PageRequestDto;
-import toy.masterShareBackend.dto.PageResponseDto;
+import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,46 +40,21 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public BoardResponse findBoard(String userKey) {
-        User user = userRepository.findByUserKey(userKey).orElseThrow();
-        Board board = user.getBoards().stream()
-                .findFirst()
-                .get();
+    public UserBoardsResponse findAllBoards(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        List<BoardDto> boards = user.getBoards().stream()
+                .map(e -> new BoardDto(e.getBoardKey(), e.getMaxSize()))
+                .collect(Collectors.toList());
 
-        return BoardResponse.builder()
+        return UserBoardsResponse.builder()
                 .username(user.getUsername())
                 .nickname(user.getNickname())
-                .maxSize(board.getMaxSize())
+                .boards(boards)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findMessageList(String userKey, PageRequestDto pageRequestDto) {
-
-        User user = userRepository.findByUserKey(userKey).orElseThrow();
-        Board board = user.getBoards().stream()
-                .findFirst()
-                .get();
-
-        PageRequest pageable = PageRequest.of(
-                pageRequestDto.getPage() - 1,
-                pageRequestDto.getSize(),
-                Sort.by("createdAt").descending()
-        );
-
-        Page<Message> result = messageRepository.findByBoardIdAndDeletedFalse(board.getId(), pageable);
-        List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> convertMessageToMessageDto(msg, false))
-                .collect(Collectors.toList());
-
-        long totalCount = result.getTotalElements();
-
-        PageResponseDto pageResponseDto = new PageResponseDto(dtoList, pageRequestDto, totalCount);
-        return pageResponseDto;
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findOpenedMessageList(String boardKey, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findMessageList(String boardKey, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
 
         Board board = boardRepository.findByBoardKey(boardKey).orElseThrow();
 
@@ -91,9 +64,10 @@ public class BoardService {
                 Sort.by("createdAt").descending()
         );
 
-        Page<Message> result = messageRepository.findByBoardIdAndDeletedFalseAndOpenedTrue(board.getId(), pageable);
+        Page<Message> result = messageRepository.findByBoardIdAndCondition(board.getId(), condition, pageable);
+
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> convertMessageToMessageDto(msg, true))
+                .map(msg -> convertMessageToMessageDto(msg))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
@@ -103,30 +77,32 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public MessageDto readMessage(String messageKey) {
+    public MessageDto readMessage(long messageId) {
 
-        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
-        if (!message.isOpened()) {
-            throw new RuntimeException("Message has not been opened yet");
+        Message message = messageRepository.findById(messageId).orElseThrow();
+
+        return convertMessageToMessageDto(message);
+    }
+
+    public MessageDto updateMessage(long messageId, MessageUpdateDto dto) {
+
+        Message message = messageRepository.findById(messageId).orElseThrow();
+
+        if (dto.getOpened() != null && dto.getOpened()) {
+            message.open();
+        }
+        if (dto.getDeleted() != null && dto.getDeleted()) {
+            message.delete();
         }
 
-        return convertMessageToMessageDto(message, true);
+        message.setLastModifiedAt(LocalDateTime.now());
+
+        return convertMessageToMessageDto(message);
     }
 
-    public MessageDto openMessage(String messageKey) {
+    public MessageDto createMessage(String boardKey, String sender, String title, String content) {
 
-        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
-        message.open();
-
-        return convertMessageToMessageDto(message, true);
-    }
-
-    public MessageDto createMessage(String ownerId, String sender, String title, String content) {
-
-        User owner = userRepository.findByUserKey(ownerId).orElseThrow();
-        Board board = owner.getBoards().stream()
-                .findFirst()
-                .get();
+        Board board = boardRepository.findByBoardKey(boardKey).orElseThrow();
 
         Message newMessage = Message.builder()
                 .sender(sender)
@@ -137,22 +113,18 @@ public class BoardService {
 
         Message message = messageRepository.save(newMessage);
 
-        return convertMessageToMessageDto(message, false);
+        return convertMessageToMessageDto(message);
     }
 
-    public void deleteMessage(String messageKey) {
-        Message message = messageRepository.findByMessageKey(messageKey).orElseThrow();
-        message.delete();
-    }
-
-    private MessageDto convertMessageToMessageDto(Message message, boolean includeContent) {
-        String content = includeContent ? message.getContent() : null;
+    private MessageDto convertMessageToMessageDto(Message message) {
+        String content = message.isOpened() ? message.getContent() : null;
         return MessageDto.builder()
-                .messageKey(message.getMessageKey())
+                .messageId(message.getId())
                 .sender(message.getSender())
                 .title(message.getTitle())
                 .content(content)
                 .opened(message.isOpened())
+                .deleted(message.isDeleted())
                 .createdAt(message.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
                 .build();
     }
