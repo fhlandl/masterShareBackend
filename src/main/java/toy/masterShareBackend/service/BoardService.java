@@ -40,10 +40,10 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public UserBoardsResponse findAllBoards(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
+    public UserBoardsResponse findAllBoards(String userKey) {
+        User user = userRepository.findByUserKey(userKey).orElseThrow();
         List<BoardDto> boards = user.getBoards().stream()
-                .map(e -> new BoardDto(e.getBoardKey(), e.getMaxSize()))
+                .map(e -> new BoardDto(e.getId(), e.getMaxSize()))
                 .collect(Collectors.toList());
 
         return UserBoardsResponse.builder()
@@ -54,9 +54,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findMessageList(String boardKey, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findMessageList(Long boardId, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
 
-        Board board = boardRepository.findByBoardKey(boardKey).orElseThrow();
+        Board board = boardRepository.findById(boardId).orElseThrow();
 
         PageRequest pageable = PageRequest.of(
                 pageRequestDto.getPage() - 1,
@@ -100,9 +100,9 @@ public class BoardService {
         return convertMessageToMessageDto(message);
     }
 
-    public MessageDto createMessage(String boardKey, String sender, String title, String content) {
+    public MessageDto createMessage(Long boardId, String sender, String title, String content) {
 
-        Board board = boardRepository.findByBoardKey(boardKey).orElseThrow();
+        Board board = boardRepository.findById(boardId).orElseThrow();
 
         Message newMessage = Message.builder()
                 .sender(sender)

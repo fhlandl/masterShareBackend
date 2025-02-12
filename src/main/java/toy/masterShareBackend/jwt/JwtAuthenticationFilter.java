@@ -45,7 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (requestURI.startsWith("/api/v1/auth/") ||
-                requestURI.startsWith("/api/v1/test")) {
+                requestURI.startsWith("/api/v1/test") ||
+                requestURI.matches("^/api/v1/users/[a-zA-Z0-9_-]+/boards$")) {
 
             return true;
         }

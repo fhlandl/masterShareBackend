@@ -9,8 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import toy.masterShareBackend.dto.*;
@@ -24,32 +22,32 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @Operation(summary = "게시판 목록 가져오기", description = "userId를 가진 회원의 게시판 정보를 가져옴", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "게시판 목록 가져오기", description = "userKey를 가진 회원의 게시판 정보를 가져옴")
     @ApiResponse(responseCode = "200")
-    @GetMapping("/users/{userId}/boards")
+    @GetMapping("/users/{userKey}/boards")
     public ResponseEntity<ResponseWrapper<UserBoardsResponse>> board(
             @Parameter(example = "1111")
-            @PathVariable Long userId) {
+            @PathVariable String userKey) {
 
-        UserBoardsResponse userBoardsResponse = boardService.findAllBoards(userId);
+        UserBoardsResponse userBoardsResponse = boardService.findAllBoards(userKey);
 
         return ResponseWrapper.success(userBoardsResponse);
     }
 
-    @Operation(summary = "메시지 목록 가져오기", description = "boardKey에 해당하는 게시판의 메시지 목록을 가져옴")
+    @Operation(summary = "메시지 목록 가져오기", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
     ))
-    @GetMapping("/boards/{boardKey}/messages")
+    @GetMapping("/boards/{boardId}/messages")
     public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> messages(
-            @Parameter(example = "9fcU9rdGc-wDQ74GiOnc") @PathVariable String boardKey,
+            @Parameter(example = "1111") @PathVariable Long boardId,
             @ModelAttribute PageRequestDto pageRequestDto,
             @Parameter(description = "open 여부", example = "true") @RequestParam(required = false) Boolean opened,
             @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted) {
 
         MessageSearchCondition condition = new MessageSearchCondition(opened, deleted);
-        PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardKey, condition, pageRequestDto);
+        PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardId, condition, pageRequestDto);
 
         return ResponseWrapper.success(messageList);
     }
@@ -93,15 +91,15 @@ public class BoardController {
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "메시지 생성", description = "boardKey에 해당하는 게시판에 메시지를 생성함")
+    @Operation(summary = "메시지 생성", description = "boardId에 해당하는 게시판에 메시지를 생성함")
     @ApiResponse(responseCode = "200")
-    @PostMapping("/boards/{boardKey}/messages")
+    @PostMapping("/boards/{boardId}/messages")
     public ResponseEntity<ResponseWrapper<MessageDto>> createMessage(
-            @Parameter(description = "게시판의 boardKey", example = "9fcU9rdGc-wDQ74GiOnc")
-            @PathVariable String boardKey,
+            @Parameter(description = "게시판의 boardId", example = "1111")
+            @PathVariable Long boardId,
             @RequestBody CreateMessageRequest dto) {
 
-        MessageDto messageDto = boardService.createMessage(boardKey, dto.getSender(), dto.getTitle(), dto.getContent());
+        MessageDto messageDto = boardService.createMessage(boardId, dto.getSender(), dto.getTitle(), dto.getContent());
 
         return ResponseWrapper.success(messageDto);
     }

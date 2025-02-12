@@ -111,7 +111,7 @@ class BoardServiceTest {
         Board board2 = createBoard(owner, 20);
 
         // when
-        UserBoardsResponse response = boardService.findAllBoards(owner.getId());
+        UserBoardsResponse response = boardService.findAllBoards(owner.getUserKey());
 
         // then
         assertThat(response.getUsername()).isEqualTo(owner.getUsername());
@@ -145,7 +145,7 @@ class BoardServiceTest {
         int pageSize= 5;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
         MessageSearchCondition condition = new MessageSearchCondition(null, null);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getBoardKey(), condition, pageRequestDto);
+        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {
@@ -186,7 +186,7 @@ class BoardServiceTest {
         int pageSize= 3;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
         MessageSearchCondition condition = new MessageSearchCondition(true, false);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getBoardKey(), condition, pageRequestDto);
+        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {
@@ -225,7 +225,7 @@ class BoardServiceTest {
         int pageSize= 5;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
         MessageSearchCondition condition = new MessageSearchCondition(null, true);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getBoardKey(), condition, pageRequestDto);
+        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
         for (int i = 0; i < response.getDataList().size(); i++) {
@@ -324,7 +324,7 @@ class BoardServiceTest {
         String content = "내용";
 
         // when
-        MessageDto messageDto = boardService.createMessage(board.getBoardKey(), sender, title, content);
+        MessageDto messageDto = boardService.createMessage(board.getId(), sender, title, content);
 
         // then
         log.info("Message {} created - {}", messageDto.getMessageId(), messageDto.getCreatedAt());

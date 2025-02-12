@@ -33,11 +33,11 @@ public class BoardAccessInterceptor implements HandlerInterceptor {
 
         boolean hasAccess = false;
 
-        // /api/v1/users/{userId}/boards
+        // /api/v1/users/{userKey}/boards
         Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         if (pathVariables != null) {
-            Long userId = Long.parseLong(pathVariables.get("userId"));
-            if (userId.equals(user.getId())) {
+            String userKey = pathVariables.get("userKey");
+            if (userKey.equals(user.getUserKey())) {
                 hasAccess = true;
             }
         }

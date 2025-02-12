@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BoardDto {
 
-    @Schema(example = "9fcU9rdGc-wDQ74GiOnc")
-    private String boardKey;
+    @Schema(example = "1111")
+    private Long boardId;
 
     @Schema(example = "10")
     private Integer maxSize;
