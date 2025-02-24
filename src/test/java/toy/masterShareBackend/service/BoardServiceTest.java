@@ -319,12 +319,13 @@ class BoardServiceTest {
         User owner = createUser("test");
         Board board = createBoard(owner, 10);
 
+        User author = createUser("author");
         String sender = "보낸사람";
         String title = "제목";
         String content = "내용";
 
         // when
-        MessageDto messageDto = boardService.createMessage(board.getId(), sender, title, content);
+        MessageDto messageDto = boardService.createMessage(board.getId(), sender, title, content, author.getId());
 
         // then
         log.info("Message {} created - {}", messageDto.getMessageId(), messageDto.getCreatedAt());

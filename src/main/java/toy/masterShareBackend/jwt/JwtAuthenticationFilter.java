@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requestURI.matches("^/api/v1/boards/[a-zA-Z0-9_-]+/messages$")) {
             // 메시지 생성
             if ("POST".equals(request.getMethod())) {
-                return true;
+                return false;
             }
 
             // 메시지 목록 가져오기

@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.service.BoardService;
 
@@ -26,7 +28,7 @@ public class BoardController {
     @ApiResponse(responseCode = "200")
     @GetMapping("/users/{userKey}/boards")
     public ResponseEntity<ResponseWrapper<UserBoardsResponse>> board(
-            @Parameter(example = "1111")
+            @Parameter(example = "9fcU9rdGc-wDQ74GiOnc")
             @PathVariable String userKey) {
 
         UserBoardsResponse userBoardsResponse = boardService.findAllBoards(userKey);
@@ -91,15 +93,17 @@ public class BoardController {
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "메시지 생성", description = "boardId에 해당하는 게시판에 메시지를 생성함")
+    @Operation(summary = "메시지 생성", description = "boardId에 해당하는 게시판에 메시지를 생성함", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200")
     @PostMapping("/boards/{boardId}/messages")
     public ResponseEntity<ResponseWrapper<MessageDto>> createMessage(
             @Parameter(description = "게시판의 boardId", example = "1111")
             @PathVariable Long boardId,
-            @RequestBody CreateMessageRequest dto) {
+            @RequestBody CreateMessageRequest dto,
+            Authentication authentication) {
 
-        MessageDto messageDto = boardService.createMessage(boardId, dto.getSender(), dto.getTitle(), dto.getContent());
+        User user = (User) authentication.getPrincipal();
+        MessageDto messageDto = boardService.createMessage(boardId, dto.getSender(), dto.getTitle(), dto.getContent(), user.getId());
 
         return ResponseWrapper.success(messageDto);
     }

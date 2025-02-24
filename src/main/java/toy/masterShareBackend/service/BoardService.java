@@ -100,16 +100,19 @@ public class BoardService {
         return convertMessageToMessageDto(message);
     }
 
-    public MessageDto createMessage(Long boardId, String sender, String title, String content) {
+    public MessageDto createMessage(Long boardId, String sender, String title, String content, Long authorId) {
 
+        User author = userRepository.findById(authorId).orElseThrow();
         Board board = boardRepository.findById(boardId).orElseThrow();
 
         Message newMessage = Message.builder()
+                .author(author)
                 .sender(sender)
                 .title(title)
                 .content(content)
                 .build();
         newMessage.setBoard(board);
+        newMessage.setAuthor(author);
 
         Message message = messageRepository.save(newMessage);
 

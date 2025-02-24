@@ -50,10 +50,11 @@ public class Message {
     private boolean deleted = false;
 
     @Builder
-    public Message(String sender, String title, String content) {
+    public Message(User author, String sender, String title, String content) {
         this.sender = sender;
         this.title = title;
         this.content = content;
+        this.author = author;
     }
 
     public void setBoard(Board board) {
