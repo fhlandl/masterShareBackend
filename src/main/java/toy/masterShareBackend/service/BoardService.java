@@ -120,6 +120,28 @@ public class BoardService {
         return convertMessageToMessageDto(message);
     }
 
+    public MessageDto createRandomMessage(String sender, String title, String content, Long authorId) {
+
+        User admin = userRepository.findByRolesContaining(UserRole.ADMIN).orElseThrow();
+        Board randomBoard = admin.getBoards().get(0);
+
+        User author = userRepository.findById(authorId).orElseThrow();
+
+        Message newMessage = Message.builder()
+                .author(author)
+                .sender(sender)
+                .title(title)
+                .content(content)
+                .build();
+        newMessage.setBoard(randomBoard);
+        newMessage.setAuthor(author);
+        newMessage.open();
+
+        Message message = messageRepository.save(newMessage);
+
+        return convertMessageToMessageDto(message);
+    }
+
     public MessageDto readRandomMessage() {
         User admin = userRepository.findByRolesContaining(UserRole.ADMIN).orElseThrow();
         Board randomBoard = admin.getBoards().get(0);

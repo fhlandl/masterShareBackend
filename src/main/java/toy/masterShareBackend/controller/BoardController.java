@@ -126,4 +126,15 @@ public class BoardController {
         return ResponseWrapper.success(messageDto);
     }
 
+    @Operation(summary = "랜덤 메시지 생성", description = "랜덤 게시판에 메시지를 생성함")
+    @ApiResponse(responseCode = "200")
+    @PostMapping("/boards/random/messages")
+    public ResponseEntity<ResponseWrapper<MessageDto>> createRandomMessage(@RequestBody CreateMessageRequest dto, Authentication authentication) {
+
+        User user = (User) authentication.getPrincipal();
+        MessageDto messageDto = boardService.createRandomMessage(dto.getSender(), dto.getTitle(), dto.getContent(), user.getId());
+
+        return ResponseWrapper.success(messageDto);
+    }
+
 }

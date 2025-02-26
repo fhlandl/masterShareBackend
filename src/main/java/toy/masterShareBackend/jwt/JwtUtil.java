@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,9 @@ import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -80,8 +83,12 @@ public class JwtUtil {
     public Authentication getAuthentication(Map<String, Object> claims) {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername((String) claims.get("username"));
+        List<Map<String, String>> roles = (List<Map<String, String>>) claims.get("roles");
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.get("authority")))
+                .collect(Collectors.toList());
 
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }
 
     private Map<String, Object> getClaims(String token) {

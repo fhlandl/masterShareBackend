@@ -11,6 +11,7 @@ import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.*;
+import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.util.TestUtil;
 
 import java.util.Arrays;
@@ -27,6 +28,9 @@ class BoardServiceTest {
 
     @Autowired
     BoardService boardService;
+
+    @Autowired
+    MessageRepository messageRepository;
 
     @Autowired
     TestUtil testUtil;
@@ -59,6 +63,17 @@ class BoardServiceTest {
                 {"제목20", "삼 년 공부 한석봉 단원 풍속도 방랑 시인 김삿갓 지도 김정호"}
         };
         return messageContents;
+    }
+
+    private String[][] getRandomMessageContentsForTest() {
+        String[][] randomMessageContents = {
+                {"랜덤1", "랜덤1 메시지입니다."},
+                {"랜덤2", "랜덤2 메시지입니다."},
+                {"랜덤3", "랜덤3 메시지입니다."},
+                {"랜덤4", "랜덤4 메시지입니다."},
+                {"랜덤5", "랜덤5 메시지입니다."}
+        };
+        return randomMessageContents;
     }
 
     @Test
@@ -293,21 +308,14 @@ class BoardServiceTest {
         assertThat(messageDto.isOpened()).isFalse();
     }
 
-    @Test
-    void readRandomMessage() {
+    private void initRandomMessageTestData() {
         User test = testUtil.createUser("test");
         Board testBoard = testUtil.createBoard(test, 10);
 
         User guest = testUtil.createUser("guest");
         Board guestBoard = testUtil.createBoard(guest, 10);
 
-        String[][] messageContents = {
-                {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
-                {"제목2", "홍익인간 뜻으로 나라 세우니 대대손손 훌륭한 인물도 많아"},
-                {"제목3", "고구려 세운 동명왕 백제 온조왕 알에서 나온 혁거세"},
-                {"제목4", "만주 벌판 달려라 광개토대왕 신라 장군 이사부"},
-                {"제목5", "백결선생 떡방아 삼천궁녀 의자왕"}
-        };
+        String[][] messageContents = getMessageContentsForTest();
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
         for (int i = 0; i < messageContents.length; i++) {
@@ -319,24 +327,27 @@ class BoardServiceTest {
         User admin = testUtil.createUserWithRoles("admin", List.of(USER, MANAGER, ADMIN));
         Board randomBoard = testUtil.createBoard(admin, 10);
 
-        String[][] randomMessageContents = {
-                {"랜덤1", "랜덤1 메시지입니다."},
-                {"랜덤2", "랜덤2 메시지입니다."},
-                {"랜덤3", "랜덤3 메시지입니다."},
-                {"랜덤4", "랜덤4 메시지입니다."},
-                {"랜덤5", "랜덤5 메시지입니다."}
-        };
-
         User randomAuthor = testUtil.createUser("random");
+
+        String[][] randomMessageContents = getRandomMessageContentsForTest();
 
         for (int i = 0; i < randomMessageContents.length; i++) {
             String[] msgSrc = randomMessageContents[i];
             testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false);
         }
+    }
+
+    @Test
+    void readRandomMessage() {
+        // given
+        initRandomMessageTestData();
+
+        String[][] randomMessageContents = getRandomMessageContentsForTest();
 
         String[] titles = Arrays.stream(randomMessageContents).map(arr -> arr[0]).toArray(String[]::new);
         String[] contents = Arrays.stream(randomMessageContents).map(arr -> arr[1]).toArray(String[]::new);
 
+        // when, then
         MessageDto messageDto = boardService.readRandomMessage();
         assertThat(titles).contains(messageDto.getTitle());
         assertThat(contents).contains(messageDto.getContent());
@@ -360,5 +371,32 @@ class BoardServiceTest {
         messageDto = boardService.readRandomMessage();
         assertThat(titles).contains(messageDto.getTitle());
         assertThat(contents).contains(messageDto.getContent());
+    }
+
+    @Test
+    void createRandomMessage() {
+        // given
+        initRandomMessageTestData();
+
+        User author = testUtil.createUser("author");
+
+        // when
+        String sender = "랜덤 메시지 보낸사람";
+        String title = "랜덤 메시지 제목";
+        String content = "랜덤 메시지 내용";
+        MessageDto messageDto = boardService.createRandomMessage(sender, title, content, author.getId());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // then
+        Message message = messageRepository.findById(messageDto.getMessageId()).orElseThrow();
+
+        assertThat(message.getSender()).isEqualTo(sender);
+        assertThat(message.getTitle()).isEqualTo(title);
+        assertThat(message.getContent()).isEqualTo(content);
+        assertThat(message.isOpened()).isTrue();
+        assertThat(message.isDeleted()).isFalse();
+        assertThat(message.getBoard().getOwner().getRoles()).contains(ADMIN);
     }
 }
