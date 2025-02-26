@@ -399,4 +399,44 @@ class BoardServiceTest {
         assertThat(message.isDeleted()).isFalse();
         assertThat(message.getBoard().getOwner().getRoles()).contains(ADMIN);
     }
+
+    @Test
+    void findUserWriteMessageList() {
+        // given
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
+
+        String[][] messageContents = getMessageContentsForTest();
+
+        List<Integer> openedMsgs = List.of(5, 12, 19);
+        List<Integer> deletedMsgs = List.of(4, 15);
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        int pageNum = 2;
+        int pageSize= 5;
+        PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
+        MessageSearchCondition condition = new MessageSearchCondition(null, null);
+        PageResponseDto<MessageDto> response = boardService.findUserWriteMessageList(author.getId(), condition, pageRequestDto);
+
+        // then
+        for (int i = 0; i < response.getDataList().size(); i++) {
+            MessageDto messageDto = response.getDataList().get(i);
+            assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
+            String content = openedMsgs.contains(14 - i) ? messageContents[14 - i][1] : null;
+            assertThat(messageDto.getContent()).isEqualTo(content);
+            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
+        }
+
+        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
+        assertThat(response.getPrevPage()).isEqualTo(pageNum - 1);
+        assertThat(response.getNextPage()).isEqualTo(pageNum + 1);
+    }
 }

@@ -8,4 +8,6 @@ import toy.masterShareBackend.dto.MessageSearchCondition;
 public interface MessageCustomRepository {
 
     Page<Message> findByBoardIdAndCondition(Long boardId, MessageSearchCondition condition, Pageable pageable);
+
+    Page<Message> findByAuthorIdAndCondition(Long authorId, MessageSearchCondition condition, Pageable pageable);
 }

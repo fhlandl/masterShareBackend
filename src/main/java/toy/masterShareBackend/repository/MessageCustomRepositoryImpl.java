@@ -34,14 +34,42 @@ public class MessageCustomRepositoryImpl implements MessageCustomRepository {
         log.info("countJpql={}", countJpql);
 
         TypedQuery<Message> query = em.createQuery(jpql, Message.class);
-        setQueryParams(query, boardId, condition);
+        setQueryParams(query, "boardId", boardId, condition);
 
         // 페이징
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 
         TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
-        setQueryParams(countQuery, boardId, condition);
+        setQueryParams(countQuery, "boardId", boardId, condition);
+
+        Long totalElements = countQuery.getSingleResult();
+        List<Message> contents = query.getResultList();
+
+        return new PageImpl<>(contents, pageable, totalElements);
+    }
+
+    @Override
+    public Page<Message> findByAuthorIdAndCondition(Long authorId, MessageSearchCondition condition, Pageable pageable) {
+
+        String conditionQuery = buildConditionQuery(condition);
+        String sortQuery = buildSortQuery(pageable);
+
+        String jpql = "select m from Message m where m.author.id = :authorId" + conditionQuery + sortQuery;
+        String countJpql = "select count(m) from Message m where m.author.id = :authorId" + conditionQuery;
+
+        log.info("jpql={}", jpql);
+        log.info("countJpql={}", countJpql);
+
+        TypedQuery<Message> query = em.createQuery(jpql, Message.class);
+        setQueryParams(query, "authorId", authorId, condition);
+
+        // 페이징
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+        setQueryParams(countQuery, "authorId", authorId, condition);
 
         Long totalElements = countQuery.getSingleResult();
         List<Message> contents = query.getResultList();
@@ -83,8 +111,8 @@ public class MessageCustomRepositoryImpl implements MessageCustomRepository {
         return sb.toString();
     }
 
-    private void setQueryParams(TypedQuery<?> query, Long boardId, MessageSearchCondition condition) {
-        query.setParameter("boardId", boardId);
+    private void setQueryParams(TypedQuery<?> query, String name, Long value, MessageSearchCondition condition) {
+        query.setParameter(name, value);
         if (condition.getOpened() != null) {
             query.setParameter("opened", condition.getOpened());
         }

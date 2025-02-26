@@ -57,7 +57,26 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponseDto<MessageDto> findMessageList(Long boardId, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
 
-        Board board = boardRepository.findById(boardId).orElseThrow();
+        PageRequest pageable = PageRequest.of(
+                pageRequestDto.getPage() - 1,
+                pageRequestDto.getSize(),
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Message> result = messageRepository.findByBoardIdAndCondition(boardId, condition, pageable);
+
+        List<MessageDto> dtoList = result.getContent().stream()
+                .map(msg -> convertMessageToMessageDto(msg))
+                .collect(Collectors.toList());
+
+        long totalCount = result.getTotalElements();
+
+        PageResponseDto pageResponseDto = new PageResponseDto(dtoList, pageRequestDto, totalCount);
+        return pageResponseDto;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<MessageDto> findUserWriteMessageList(Long authorId, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
 
         PageRequest pageable = PageRequest.of(
                 pageRequestDto.getPage() - 1,
@@ -65,7 +84,7 @@ public class BoardService {
                 Sort.by("createdAt").descending()
         );
 
-        Page<Message> result = messageRepository.findByBoardIdAndCondition(board.getId(), condition, pageable);
+        Page<Message> result = messageRepository.findByAuthorIdAndCondition(authorId, condition, pageable);
 
         List<MessageDto> dtoList = result.getContent().stream()
                 .map(msg -> convertMessageToMessageDto(msg))
@@ -142,6 +161,7 @@ public class BoardService {
         return convertMessageToMessageDto(message);
     }
 
+    @Transactional(readOnly = true)
     public MessageDto readRandomMessage() {
         User admin = userRepository.findByRolesContaining(UserRole.ADMIN).orElseThrow();
         Board randomBoard = admin.getBoards().get(0);
