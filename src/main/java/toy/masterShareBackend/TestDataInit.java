@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
+import toy.masterShareBackend.domain.UserRole;
 import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
@@ -97,6 +98,47 @@ public class TestDataInit {
             if (openedMsgs.contains(i)) {
                 message.open();
             }
+
+            messageRepository.save(message);
+        }
+
+        initRandomBoard();
+    }
+
+    private void initRandomBoard() {
+        // admin 사용자 추가
+        User admin = userRepository.save(User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin_pw"))
+                .email("admin@abc.com")
+                .nickname("admin_nick")
+                .roles(List.of(UserRole.USER, UserRole.MANAGER, UserRole.ADMIN))
+                .build());
+
+        Board newRandomBoard = Board.builder()
+                .maxSize(10)
+                .build();
+        newRandomBoard.setOwner(admin);
+        Board randomBoard = boardRepository.save(newRandomBoard);
+
+        String[][] messageContents = {
+                {"랜덤1", "랜덤1 메시지입니다."},
+                {"랜덤2", "랜덤2 메시지입니다."},
+                {"랜덤3", "랜덤3 메시지입니다."},
+                {"랜덤4", "랜덤4 메시지입니다."},
+                {"랜덤5", "랜덤5 메시지입니다."}
+        };
+
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
+            Message message = Message.builder()
+                    .sender(admin.getNickname())
+                    .title(msgSrc[0])
+                    .content(msgSrc[1])
+                    .build();
+            message.setAuthor(admin);
+            message.setBoard(randomBoard);
+            message.open();
 
             messageRepository.save(message);
         }

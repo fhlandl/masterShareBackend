@@ -11,6 +11,7 @@ import toy.masterShareBackend.util.IdUtil;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -38,6 +39,12 @@ public class User implements UserDetails {
     @Column
     private String nickname;
 
+    @ElementCollection
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> roles = new ArrayList();
+
     @OneToMany(mappedBy = "owner")
     private List<Board> boards = new ArrayList<>();
 
@@ -59,16 +66,27 @@ public class User implements UserDetails {
     }
 
     @Builder
-    public User(String username, String password, String email, String nickname) {
+    public User(String username, String password, String email, String nickname, List<UserRole> roles) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.nickname = nickname;
+        if (roles == null) {
+            this.roles.add(UserRole.USER);
+        } else {
+            this.roles = roles;
+        }
+    }
+
+    public void addRole(UserRole userRole) {
+        this.roles.add(userRole);
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.toString()))
+                .collect(Collectors.toList());
     }
 
     @Override
