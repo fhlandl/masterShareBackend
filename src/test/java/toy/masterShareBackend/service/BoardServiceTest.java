@@ -11,15 +11,12 @@ import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.*;
-import toy.masterShareBackend.repository.BoardRepository;
-import toy.masterShareBackend.repository.MessageRepository;
-import toy.masterShareBackend.repository.UserRepository;
+import toy.masterShareBackend.util.TestUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -30,52 +27,11 @@ class BoardServiceTest {
     BoardService boardService;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    BoardRepository boardRepository;
-
-    @Autowired
-    MessageRepository messageRepository;
+    TestUtil testUtil;
 
     @PersistenceContext
     EntityManager entityManager;
 
-    private User createUser(String username) {
-        return userRepository.save(User.builder()
-                .username(username)
-                .password(username + "_pw")
-                .email(username + "@abc.com")
-                .nickname(username + "_nick")
-                .build());
-    }
-
-    private Board createBoard(User owner, int maxSize) {
-        Board newBoard = Board.builder()
-                .maxSize(maxSize)
-                .build();
-        newBoard.setOwner(owner);
-        return boardRepository.save(newBoard);
-    }
-
-    private Message createMessage(Board board, User author, String sender, String title, String content, boolean opened, boolean deleted) {
-        Message message = Message.builder()
-                .sender(sender)
-                .title(title)
-                .content(content)
-                .build();
-        message.setBoard(board);
-        if (author != null) {
-            message.setAuthor(author);
-        }
-        if (opened) {
-            message.open();
-        }
-        if (deleted) {
-            message.delete();
-        }
-        return messageRepository.save(message);
-    }
 
     private String[][] getMessageContentsForTest() {
         String[][] messageContents = {
@@ -106,9 +62,9 @@ class BoardServiceTest {
     @Test
     void findAllBoards() {
         // given
-        User owner = createUser("test");
-        Board board1 = createBoard(owner, 10);
-        Board board2 = createBoard(owner, 20);
+        User owner = testUtil.createUser("test");
+        Board board1 = testUtil.createBoard(owner, 10);
+        Board board2 = testUtil.createBoard(owner, 20);
 
         // when
         UserBoardsResponse response = boardService.findAllBoards(owner.getUserKey());
@@ -124,9 +80,9 @@ class BoardServiceTest {
     @Test
     void findMessageList() {
         // given
-        User owner = createUser("test");
-        User author = createUser("guest");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
 
         String[][] messageContents = getMessageContentsForTest();
 
@@ -134,7 +90,7 @@ class BoardServiceTest {
         List<Integer> deletedMsgs = List.of(4, 15);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
         }
 
         entityManager.flush();
@@ -164,9 +120,9 @@ class BoardServiceTest {
     @Test
     void findMessageList_opened_not_deleted() {
         // given
-        User owner = createUser("test");
-        User author = createUser("guest");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
 
         String[][] messageContents = getMessageContentsForTest();
 
@@ -178,7 +134,7 @@ class BoardServiceTest {
                 .collect(Collectors.toList());
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
         }
 
         // when
@@ -207,9 +163,9 @@ class BoardServiceTest {
     @Test
     void findMessageList_deleted() {
         // given
-        User owner = createUser("test");
-        User author = createUser("guest");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
 
         String[][] messageContents = getMessageContentsForTest();
 
@@ -217,7 +173,7 @@ class BoardServiceTest {
         List<Integer> deletedMsgs = List.of(5, 15);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
         }
 
         // when
@@ -246,15 +202,15 @@ class BoardServiceTest {
     @Test
     void readMessageSuccess() {
         // given
-        User owner = createUser("test");
-        User author = createUser("guest");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
 
         String title = "제목";
         String content = "내용";
         String sender = author.getNickname();
 
-        Message message = createMessage(board, author, sender, title, content, true, false);
+        Message message = testUtil.createMessage(board, author, sender, title, content, true, false);
 
         // when
         MessageDto messageDto = boardService.readMessage(message.getId());
@@ -269,15 +225,15 @@ class BoardServiceTest {
     @Test
     void updateMessage_open() {
         // given
-        User owner = createUser("test");
-        User author = createUser("guest");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        User author = testUtil.createUser("guest");
+        Board board = testUtil.createBoard(owner, 10);
 
         String title = "제목";
         String content = "내용";
         String sender = author.getNickname();
 
-        Message message = createMessage(board, author, sender, title, content, false, false);
+        Message message = testUtil.createMessage(board, author, sender, title, content, false, false);
 
         // when
         MessageUpdateDto messageUpdateDto = new MessageUpdateDto();
@@ -294,14 +250,14 @@ class BoardServiceTest {
     @Test
     void updateMessage_delete() {
         // given
-        User owner = createUser("test");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        Board board = testUtil.createBoard(owner, 10);
 
         String sender = "보낸사람";
         String title = "제목";
         String content = "내용";
 
-        Message message = createMessage(board, null, sender, title, content, false, false);
+        Message message = testUtil.createMessage(board, null, sender, title, content, false, false);
 
         // when
         MessageUpdateDto messageUpdateDto = new MessageUpdateDto();
@@ -309,17 +265,17 @@ class BoardServiceTest {
         MessageDto messageDto = boardService.updateMessage(message.getId(), messageUpdateDto);
 
         // then
-        Message foundMessage = messageRepository.findById(message.getId()).get();
+        MessageDto foundMessage = boardService.readMessage(messageDto.getMessageId());
         assertThat(foundMessage.isDeleted()).isTrue();
     }
 
     @Test
     void createMessage_test() {
         // given
-        User owner = createUser("test");
-        Board board = createBoard(owner, 10);
+        User owner = testUtil.createUser("test");
+        Board board = testUtil.createBoard(owner, 10);
 
-        User author = createUser("author");
+        User author = testUtil.createUser("author");
         String sender = "보낸사람";
         String title = "제목";
         String content = "내용";

@@ -4,28 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
-import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
-import toy.masterShareBackend.domain.UserRole;
-import toy.masterShareBackend.repository.BoardRepository;
-import toy.masterShareBackend.repository.MessageRepository;
-import toy.masterShareBackend.repository.UserRepository;
+import toy.masterShareBackend.util.TestUtil;
 
 import java.util.List;
+
+import static toy.masterShareBackend.domain.UserRole.*;
 
 @Component
 @RequiredArgsConstructor
 @Profile("default")
 public class TestDataInit {
 
-    private final UserRepository userRepository;
-    private final BoardRepository boardRepository;
-    private final MessageRepository messageRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final TestUtil testUtil;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
@@ -35,31 +29,11 @@ public class TestDataInit {
     }
 
     private void initMessages() {
-        User test = userRepository.save(User.builder()
-                .username("test")
-                .password(passwordEncoder.encode("test_pw"))
-                .email("test@abc.com")
-                .nickname("test_nick")
-                .build());
+        User test = testUtil.createUser("test");
+        Board testBoard = testUtil.createBoard(test, 10);
 
-        Board newTestBoard = Board.builder()
-                .maxSize(10)
-                .build();
-        newTestBoard.setOwner(test);
-        Board testBoard = boardRepository.save(newTestBoard);
-
-        User guest = userRepository.save(User.builder()
-                .username("guest")
-                .password(passwordEncoder.encode("guest_pw"))
-                .email("guest@abc.com")
-                .nickname("guest_nick")
-                .build());
-
-        Board newGuestBoard = Board.builder()
-                .maxSize(10)
-                .build();
-        newGuestBoard.setOwner(guest);
-        Board guestBoard = boardRepository.save(newGuestBoard);
+        User guest = testUtil.createUser("guest");
+        Board guestBoard = testUtil.createBoard(guest, 10);
 
         String[][] messageContents = {
                 {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
@@ -87,19 +61,7 @@ public class TestDataInit {
         List<Integer> openedMsgs = List.of(5, 12, 19);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            Message message = Message.builder()
-                    .sender(guest.getNickname())
-                    .title(msgSrc[0])
-                    .content(msgSrc[1])
-                    .build();
-            message.setAuthor(guest);
-            message.setBoard(testBoard);
-
-            if (openedMsgs.contains(i)) {
-                message.open();
-            }
-
-            messageRepository.save(message);
+            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false);
         }
 
         initRandomBoard();
@@ -107,19 +69,8 @@ public class TestDataInit {
 
     private void initRandomBoard() {
         // admin 사용자 추가
-        User admin = userRepository.save(User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin_pw"))
-                .email("admin@abc.com")
-                .nickname("admin_nick")
-                .roles(List.of(UserRole.USER, UserRole.MANAGER, UserRole.ADMIN))
-                .build());
-
-        Board newRandomBoard = Board.builder()
-                .maxSize(10)
-                .build();
-        newRandomBoard.setOwner(admin);
-        Board randomBoard = boardRepository.save(newRandomBoard);
+        User admin = testUtil.createUserWithRoles("admin", List.of(USER, MANAGER, ADMIN));
+        Board randomBoard = testUtil.createBoard(admin, 10);
 
         String[][] messageContents = {
                 {"랜덤1", "랜덤1 메시지입니다."},
@@ -129,18 +80,11 @@ public class TestDataInit {
                 {"랜덤5", "랜덤5 메시지입니다."}
         };
 
+        User randomAuthor = testUtil.createUser("random");
+
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            Message message = Message.builder()
-                    .sender(admin.getNickname())
-                    .title(msgSrc[0])
-                    .content(msgSrc[1])
-                    .build();
-            message.setAuthor(admin);
-            message.setBoard(randomBoard);
-            message.open();
-
-            messageRepository.save(message);
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false);
         }
     }
 }
