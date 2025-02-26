@@ -73,6 +73,24 @@ public class BoardController {
         }
     }
 
+    @Operation(summary = "랜덤 메시지 하나 가져오기", description = "random board의 메시지를 가져옴")
+    @ApiResponse(responseCode = "200", content = @Content(
+            schema = @Schema(implementation = ResponseWrapper.class),
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": 1111,\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
+    ))
+    @GetMapping("/boards/random/messages")
+    public ResponseEntity<ResponseWrapper<MessageDto>> getRandomMessage() {
+
+        try {
+            MessageDto messageDto = boardService.readRandomMessage();
+            return ResponseWrapper.success(messageDto);
+
+        } catch (RuntimeException e) {
+
+            return ResponseWrapper.fail(1234, e.getMessage());
+        }
+    }
+
     @Operation(summary = "메시지 업데이트", description = "messageId를 가진 메시지를 업데이트", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.Board;
 import toy.masterShareBackend.domain.Message;
 import toy.masterShareBackend.domain.User;
+import toy.masterShareBackend.domain.UserRole;
 import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
@@ -117,6 +118,14 @@ public class BoardService {
         Message message = messageRepository.save(newMessage);
 
         return convertMessageToMessageDto(message);
+    }
+
+    public MessageDto readRandomMessage() {
+        User admin = userRepository.findByRolesContaining(UserRole.ADMIN).orElseThrow();
+        Board randomBoard = admin.getBoards().get(0);
+        Message randomMessage = messageRepository.findRandomMessageByBoardId(randomBoard.getId()).orElseThrow();
+
+        return convertMessageToMessageDto(randomMessage);
     }
 
     private MessageDto convertMessageToMessageDto(Message message) {

@@ -13,10 +13,12 @@ import toy.masterShareBackend.domain.User;
 import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.util.TestUtil;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static toy.masterShareBackend.domain.UserRole.*;
 
 @SpringBootTest
 @Transactional
@@ -289,5 +291,74 @@ class BoardServiceTest {
         assertThat(messageDto.getTitle()).isEqualTo(title);
         assertThat(messageDto.getContent()).isNull();
         assertThat(messageDto.isOpened()).isFalse();
+    }
+
+    @Test
+    void readRandomMessage() {
+        User test = testUtil.createUser("test");
+        Board testBoard = testUtil.createBoard(test, 10);
+
+        User guest = testUtil.createUser("guest");
+        Board guestBoard = testUtil.createBoard(guest, 10);
+
+        String[][] messageContents = {
+                {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
+                {"제목2", "홍익인간 뜻으로 나라 세우니 대대손손 훌륭한 인물도 많아"},
+                {"제목3", "고구려 세운 동명왕 백제 온조왕 알에서 나온 혁거세"},
+                {"제목4", "만주 벌판 달려라 광개토대왕 신라 장군 이사부"},
+                {"제목5", "백결선생 떡방아 삼천궁녀 의자왕"}
+        };
+
+        List<Integer> openedMsgs = List.of(5, 12, 19);
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
+            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false);
+        }
+
+        // admin 사용자 추가
+        User admin = testUtil.createUserWithRoles("admin", List.of(USER, MANAGER, ADMIN));
+        Board randomBoard = testUtil.createBoard(admin, 10);
+
+        String[][] randomMessageContents = {
+                {"랜덤1", "랜덤1 메시지입니다."},
+                {"랜덤2", "랜덤2 메시지입니다."},
+                {"랜덤3", "랜덤3 메시지입니다."},
+                {"랜덤4", "랜덤4 메시지입니다."},
+                {"랜덤5", "랜덤5 메시지입니다."}
+        };
+
+        User randomAuthor = testUtil.createUser("random");
+
+        for (int i = 0; i < randomMessageContents.length; i++) {
+            String[] msgSrc = randomMessageContents[i];
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false);
+        }
+
+        String[] titles = Arrays.stream(randomMessageContents).map(arr -> arr[0]).toArray(String[]::new);
+        String[] contents = Arrays.stream(randomMessageContents).map(arr -> arr[1]).toArray(String[]::new);
+
+        MessageDto messageDto = boardService.readRandomMessage();
+        assertThat(titles).contains(messageDto.getTitle());
+        assertThat(contents).contains(messageDto.getContent());
+//        log.info("messageId: {}, title: {}, content: {}",
+//                messageDto.getMessageId(),
+//                messageDto.getTitle(),
+//                messageDto.getContent());
+
+        messageDto = boardService.readRandomMessage();
+        assertThat(titles).contains(messageDto.getTitle());
+        assertThat(contents).contains(messageDto.getContent());
+
+        messageDto = boardService.readRandomMessage();
+        assertThat(titles).contains(messageDto.getTitle());
+        assertThat(contents).contains(messageDto.getContent());
+
+        messageDto = boardService.readRandomMessage();
+        assertThat(titles).contains(messageDto.getTitle());
+        assertThat(contents).contains(messageDto.getContent());
+
+        messageDto = boardService.readRandomMessage();
+        assertThat(titles).contains(messageDto.getTitle());
+        assertThat(contents).contains(messageDto.getContent());
     }
 }
