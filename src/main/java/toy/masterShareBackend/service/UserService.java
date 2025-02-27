@@ -5,6 +5,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import toy.masterShareBackend.domain.User;
+import toy.masterShareBackend.dto.UserInfo;
+import toy.masterShareBackend.dto.UserUpdateDto;
 import toy.masterShareBackend.repository.UserRepository;
 
 import java.util.Optional;
@@ -51,4 +53,24 @@ public class UserService {
 //                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
 //                .orElseThrow();
 //    }
+
+    public UserInfo findUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        return new UserInfo(user.getUserKey(), user.getUsername(), user.getEmail(), user.getNickname());
+    }
+
+    public UserInfo updateUser(Long userId, UserUpdateDto dto) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
+
+        if (dto.getNickname() != null) {
+            user.setNickname(dto.getNickname());
+        }
+
+        return new UserInfo(user.getUserKey(), user.getUsername(), user.getEmail(), user.getNickname());
+    }
 }

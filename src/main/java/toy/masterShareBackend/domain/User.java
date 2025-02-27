@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,9 +34,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Setter
     @Column
     private String email;
 
+    @Setter
     @Column
     private String nickname;
 
