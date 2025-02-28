@@ -59,9 +59,13 @@ public class TestDataInit {
         };
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
+        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false);
+            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1],
+                    openedMsgs.contains(i),
+                    false,
+                    publicMsgs.contains(i));
         }
 
         initRandomBoard();
@@ -84,7 +88,7 @@ public class TestDataInit {
 
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false);
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, false);
         }
     }
 }

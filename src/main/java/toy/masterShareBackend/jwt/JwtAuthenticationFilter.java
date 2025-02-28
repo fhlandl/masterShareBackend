@@ -68,8 +68,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // 메시지 목록 가져오기
-            if ("true".equals(request.getParameter("deleted"))) {
-                return false;
+            if ("GET".equals(request.getMethod())) {
+                if ("true".equals(request.getParameter("deleted"))) {
+                    return false;
+                }
+                if ("true".equals(request.getParameter("includePrivate"))) {
+                    return false;
+                }
             }
 
             return true;

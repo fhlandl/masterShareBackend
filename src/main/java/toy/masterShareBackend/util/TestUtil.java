@@ -51,7 +51,7 @@ public class TestUtil {
         return boardRepository.save(newBoard);
     }
 
-    public Message createMessage(Board board, User author, String sender, String title, String content, boolean opened, boolean deleted) {
+    public Message createMessage(Board board, User author, String sender, String title, String content, boolean opened, boolean deleted, boolean isPublic) {
         Message message = Message.builder()
                 .sender(sender)
                 .title(title)
@@ -67,6 +67,7 @@ public class TestUtil {
         if (deleted) {
             message.delete();
         }
+        message.setPublic(isPublic);
         return messageRepository.save(message);
     }
 }

@@ -105,9 +105,13 @@ class BoardServiceTest {
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
         List<Integer> deletedMsgs = List.of(4, 15);
+        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
+                    openedMsgs.contains(i),
+                    deletedMsgs.contains(i),
+                    publicMsgs.contains(i));
         }
 
         entityManager.flush();
@@ -117,7 +121,7 @@ class BoardServiceTest {
         int pageNum = 2;
         int pageSize= 5;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, null);
+        MessageSearchCondition condition = new MessageSearchCondition(null, null, null);
         PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
@@ -145,20 +149,24 @@ class BoardServiceTest {
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
         List<Integer> deletedMsgs = List.of(5, 15);
+        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
 
         List<Integer> openedAndNotDeleted = openedMsgs.stream()
                 .filter(e -> !deletedMsgs.contains(e))
                 .collect(Collectors.toList());
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
+                    openedMsgs.contains(i),
+                    deletedMsgs.contains(i),
+                    publicMsgs.contains(i));
         }
 
         // when
         int pageNum = 1;
         int pageSize= 3;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(true, false);
+        MessageSearchCondition condition = new MessageSearchCondition(true, false, null);
         PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
@@ -188,16 +196,21 @@ class BoardServiceTest {
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
         List<Integer> deletedMsgs = List.of(5, 15);
+        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
+
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
+                    openedMsgs.contains(i),
+                    deletedMsgs.contains(i),
+                    publicMsgs.contains(i));
         }
 
         // when
         int pageNum = 1;
         int pageSize= 5;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, true);
+        MessageSearchCondition condition = new MessageSearchCondition(null, true, null);
         PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
         // then
@@ -227,7 +240,7 @@ class BoardServiceTest {
         String content = "내용";
         String sender = author.getNickname();
 
-        Message message = testUtil.createMessage(board, author, sender, title, content, true, false);
+        Message message = testUtil.createMessage(board, author, sender, title, content, true, false, false);
 
         // when
         MessageDto messageDto = boardService.readMessage(message.getId());
@@ -250,7 +263,7 @@ class BoardServiceTest {
         String content = "내용";
         String sender = author.getNickname();
 
-        Message message = testUtil.createMessage(board, author, sender, title, content, false, false);
+        Message message = testUtil.createMessage(board, author, sender, title, content, false, false, false);
 
         // when
         MessageUpdateDto messageUpdateDto = new MessageUpdateDto();
@@ -274,7 +287,7 @@ class BoardServiceTest {
         String title = "제목";
         String content = "내용";
 
-        Message message = testUtil.createMessage(board, null, sender, title, content, false, false);
+        Message message = testUtil.createMessage(board, null, sender, title, content, false, false, false);
 
         // when
         MessageUpdateDto messageUpdateDto = new MessageUpdateDto();
@@ -321,7 +334,7 @@ class BoardServiceTest {
         List<Integer> openedMsgs = List.of(5, 12, 19);
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false);
+            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false, false);
         }
 
         // admin 사용자 추가
@@ -334,7 +347,7 @@ class BoardServiceTest {
 
         for (int i = 0; i < randomMessageContents.length; i++) {
             String[] msgSrc = randomMessageContents[i];
-            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false);
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, true);
         }
     }
 
@@ -414,9 +427,14 @@ class BoardServiceTest {
 
         List<Integer> openedMsgs = List.of(5, 12, 19);
         List<Integer> deletedMsgs = List.of(4, 15);
+        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
+
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), deletedMsgs.contains(i));
+            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
+                    openedMsgs.contains(i),
+                    deletedMsgs.contains(i),
+                    publicMsgs.contains(i));
         }
 
         entityManager.flush();
@@ -426,7 +444,7 @@ class BoardServiceTest {
         int pageNum = 2;
         int pageSize= 5;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, null);
+        MessageSearchCondition condition = new MessageSearchCondition(null, null, null);
         PageResponseDto<MessageDto> response = boardService.findUserWriteMessageList(author.getId(), condition, pageRequestDto);
 
         // then

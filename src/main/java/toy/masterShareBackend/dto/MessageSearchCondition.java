@@ -10,4 +10,6 @@ public class MessageSearchCondition {
     private Boolean opened;
 
     private Boolean deleted;
+
+    private Boolean includePrivate;
 }

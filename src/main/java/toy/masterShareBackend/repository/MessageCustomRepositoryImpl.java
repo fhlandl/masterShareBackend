@@ -88,6 +88,10 @@ public class MessageCustomRepositoryImpl implements MessageCustomRepository {
             sb.append(" and m.deleted = :deleted");
         }
 
+        if (condition.getIncludePrivate() != null && condition.getIncludePrivate().equals(false)) {
+            sb.append(" and m.isPublic = true");
+        }
+
         return sb.toString();
     }
 

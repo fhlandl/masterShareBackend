@@ -39,16 +39,17 @@ public class BoardController {
     @Operation(summary = "메시지 목록 가져오기", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴")
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"isPublic\":true,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
     ))
     @GetMapping("/boards/{boardId}/messages")
     public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> messages(
             @Parameter(example = "1111") @PathVariable Long boardId,
             @ModelAttribute PageRequestDto pageRequestDto,
             @Parameter(description = "open 여부", example = "true") @RequestParam(required = false) Boolean opened,
-            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted) {
+            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted,
+            @Parameter(description = "비공개 메시지 포함 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean includePrivate) {
 
-        MessageSearchCondition condition = new MessageSearchCondition(opened, deleted);
+        MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, includePrivate);
         PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardId, condition, pageRequestDto);
 
         return ResponseWrapper.success(messageList);
@@ -57,7 +58,7 @@ public class BoardController {
     @Operation(summary = "내가 작성한 메시지 목록 가져오기", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
+            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"isPublic\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
     ))
     @GetMapping("/users/{userKey}/messages")
     public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> writtenMessages(
@@ -65,6 +66,7 @@ public class BoardController {
             @ModelAttribute PageRequestDto pageRequestDto,
             @Parameter(description = "open 여부", example = "true") @RequestParam(required = false) Boolean opened,
             @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted,
+            @Parameter(description = "비공개 메시지 포함 여부", example = "true") @RequestParam(required = false, defaultValue = "true") Boolean includePrivate,
             Authentication authentication) {
 
         try {
@@ -72,7 +74,7 @@ public class BoardController {
             if (!userKey.equals(user.getUserKey())) {
                 throw new RuntimeException("invalid access");
             }
-            MessageSearchCondition condition = new MessageSearchCondition(opened, deleted);
+            MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, includePrivate);
             PageResponseDto<MessageDto> messageList = boardService.findUserWriteMessageList(user.getId(), condition, pageRequestDto);
 
             return ResponseWrapper.success(messageList);

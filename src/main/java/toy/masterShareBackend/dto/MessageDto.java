@@ -1,6 +1,7 @@
 package toy.masterShareBackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,7 @@ public class MessageDto {
     @Schema(example = "false")
     private boolean deleted;
 
+    @JsonProperty("isPublic")
     @Schema(example = "false")
     private boolean isPublic;
 
