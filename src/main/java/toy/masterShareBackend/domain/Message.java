@@ -49,6 +49,10 @@ public class Message {
     @Column(nullable = false)
     private boolean deleted = false;
 
+    @Setter
+    @Column(name = "is_public", nullable = false)
+    private boolean isPublic = false;
+
     @Builder
     public Message(User author, String sender, String title, String content) {
         this.sender = sender;

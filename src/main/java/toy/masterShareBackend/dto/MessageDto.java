@@ -30,6 +30,9 @@ public class MessageDto {
     @Schema(example = "false")
     private boolean deleted;
 
+    @Schema(example = "false")
+    private boolean isPublic;
+
     @Schema(example = "2024.12.19 21:45")
     private String createdAt;
 }

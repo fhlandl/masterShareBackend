@@ -16,4 +16,7 @@ public class CreateMessageRequest {
 
     @Schema(example = "메시지 내용")
     private String content;
+
+    @Schema(example = "false")
+    private Boolean isPublic;
 }

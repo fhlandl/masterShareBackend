@@ -120,26 +120,29 @@ public class BoardService {
         return convertMessageToMessageDto(message);
     }
 
-    public MessageDto createMessage(Long boardId, String sender, String title, String content, Long authorId) {
+    public MessageDto createMessage(Long boardId, Long authorId, CreateMessageRequest dto) {
 
         User author = userRepository.findById(authorId).orElseThrow();
         Board board = boardRepository.findById(boardId).orElseThrow();
 
         Message newMessage = Message.builder()
                 .author(author)
-                .sender(sender)
-                .title(title)
-                .content(content)
+                .sender(dto.getSender())
+                .title(dto.getTitle())
+                .content(dto.getContent())
                 .build();
         newMessage.setBoard(board);
         newMessage.setAuthor(author);
+        if (dto.getIsPublic() != null) {
+            newMessage.setPublic(dto.getIsPublic());
+        }
 
         Message message = messageRepository.save(newMessage);
 
         return convertMessageToMessageDto(message);
     }
 
-    public MessageDto createRandomMessage(String sender, String title, String content, Long authorId) {
+    public MessageDto createRandomMessage(Long authorId, CreateMessageRequest dto) {
 
         User admin = userRepository.findByRolesContaining(UserRole.ADMIN).orElseThrow();
         Board randomBoard = admin.getBoards().get(0);
@@ -148,13 +151,14 @@ public class BoardService {
 
         Message newMessage = Message.builder()
                 .author(author)
-                .sender(sender)
-                .title(title)
-                .content(content)
+                .sender(dto.getSender())
+                .title(dto.getTitle())
+                .content(dto.getContent())
                 .build();
         newMessage.setBoard(randomBoard);
         newMessage.setAuthor(author);
         newMessage.open();
+        newMessage.setPublic(true);
 
         Message message = messageRepository.save(newMessage);
 
@@ -179,6 +183,7 @@ public class BoardService {
                 .content(content)
                 .opened(message.isOpened())
                 .deleted(message.isDeleted())
+                .isPublic(message.isPublic())
                 .createdAt(message.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
                 .build();
     }

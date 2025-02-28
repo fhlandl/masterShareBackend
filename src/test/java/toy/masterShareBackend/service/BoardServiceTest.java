@@ -293,17 +293,18 @@ class BoardServiceTest {
         Board board = testUtil.createBoard(owner, 10);
 
         User author = testUtil.createUser("author");
-        String sender = "보낸사람";
-        String title = "제목";
-        String content = "내용";
+        CreateMessageRequest dto = new CreateMessageRequest();
+        dto.setSender("보낸사람");
+        dto.setTitle("제목");
+        dto.setContent("내용");
 
         // when
-        MessageDto messageDto = boardService.createMessage(board.getId(), sender, title, content, author.getId());
+        MessageDto messageDto = boardService.createMessage(board.getId(), author.getId(), dto);
 
         // then
         log.info("Message {} created - {}", messageDto.getMessageId(), messageDto.getCreatedAt());
-        assertThat(messageDto.getSender()).isEqualTo(sender);
-        assertThat(messageDto.getTitle()).isEqualTo(title);
+        assertThat(messageDto.getSender()).isEqualTo(dto.getSender());
+        assertThat(messageDto.getTitle()).isEqualTo(dto.getTitle());
         assertThat(messageDto.getContent()).isNull();
         assertThat(messageDto.isOpened()).isFalse();
     }
@@ -380,11 +381,13 @@ class BoardServiceTest {
 
         User author = testUtil.createUser("author");
 
+        CreateMessageRequest dto = new CreateMessageRequest();
+        dto.setSender("랜덤 메시지 보낸사람");
+        dto.setTitle("랜덤 메시지 제목");
+        dto.setContent("랜덤 메시지 내용");
+
         // when
-        String sender = "랜덤 메시지 보낸사람";
-        String title = "랜덤 메시지 제목";
-        String content = "랜덤 메시지 내용";
-        MessageDto messageDto = boardService.createRandomMessage(sender, title, content, author.getId());
+        MessageDto messageDto = boardService.createRandomMessage(author.getId(), dto);
 
         entityManager.flush();
         entityManager.clear();
@@ -392,9 +395,9 @@ class BoardServiceTest {
         // then
         Message message = messageRepository.findById(messageDto.getMessageId()).orElseThrow();
 
-        assertThat(message.getSender()).isEqualTo(sender);
-        assertThat(message.getTitle()).isEqualTo(title);
-        assertThat(message.getContent()).isEqualTo(content);
+        assertThat(message.getSender()).isEqualTo(dto.getSender());
+        assertThat(message.getTitle()).isEqualTo(dto.getTitle());
+        assertThat(message.getContent()).isEqualTo(dto.getContent());
         assertThat(message.isOpened()).isTrue();
         assertThat(message.isDeleted()).isFalse();
         assertThat(message.getBoard().getOwner().getRoles()).contains(ADMIN);

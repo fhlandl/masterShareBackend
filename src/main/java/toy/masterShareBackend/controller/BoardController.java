@@ -149,7 +149,7 @@ public class BoardController {
             Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
-        MessageDto messageDto = boardService.createMessage(boardId, dto.getSender(), dto.getTitle(), dto.getContent(), user.getId());
+        MessageDto messageDto = boardService.createMessage(boardId, user.getId(), dto);
 
         return ResponseWrapper.success(messageDto);
     }
@@ -160,7 +160,7 @@ public class BoardController {
     public ResponseEntity<ResponseWrapper<MessageDto>> createRandomMessage(@RequestBody CreateMessageRequest dto, Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
-        MessageDto messageDto = boardService.createRandomMessage(dto.getSender(), dto.getTitle(), dto.getContent(), user.getId());
+        MessageDto messageDto = boardService.createRandomMessage(user.getId(), dto);
 
         return ResponseWrapper.success(messageDto);
     }
