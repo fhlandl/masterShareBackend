@@ -11,7 +11,7 @@ public class MessageUpdateDto {
     @Schema(example = "메시지 제목")
     private String title;
 
-    @Schema(example = "null", nullable = true)
+    @Schema(example = "메시지 내용", nullable = true)
     private String content;
 
     @Schema(example = "false")

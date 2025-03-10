@@ -1,5 +1,6 @@
 package toy.masterShareBackend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,11 +18,26 @@ public class PageResponseDto<E> {
 
     private PageRequestDto pageRequest;
 
-    private boolean hasPrev, hasNext;
+    @Schema(example = "true")
+    private boolean hasPrev;
 
-    private int totalDataCount, currentPage;
+    @Schema(example = "true")
+    private boolean hasNext;
 
-    private Integer prevPage, nextPage, lastPage;
+    @Schema(example = "47")
+    private int totalDataCount;
+
+    @Schema(example = "2")
+    private int currentPage;
+
+    @Schema(example = "1")
+    private Integer prevPage;
+
+    @Schema(example = "3")
+    private Integer nextPage;
+
+    @Schema(example = "5")
+    private Integer lastPage;
 
     public PageResponseDto(List<E> dataList, PageRequestDto pageRequest, long totalDataCount) {
 

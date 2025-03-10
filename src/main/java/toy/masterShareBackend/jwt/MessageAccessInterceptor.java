@@ -24,14 +24,8 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         log.info("Check url for message access: {}", requestURI);
 
-        String[] urlArr = requestURI.split("/");
-        long messageId = Long.parseLong(urlArr[urlArr.length - 1]);
+        boolean hasAccess = checkMessageAuthorization(requestURI);
 
-        if (shouldNotIntercept(request, messageId)) {
-            return true;
-        }
-
-        boolean hasAccess = checkMessageAuthorization(messageId);
         if (!hasAccess) {
             log.info("Message access denied");
 
@@ -45,33 +39,59 @@ public class MessageAccessInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private boolean checkMessageAuthorization(long messageId) {
+    private long getMessageIdFromRequestUri(String requestURI) {
+        long messageId = -1L;
+        String[] urlArr = requestURI.split("/");
+
+        if (isUpdateMessage(requestURI)) {
+            messageId = Long.parseLong(urlArr[urlArr.length - 1]);
+        } else if (isGetMessage(requestURI)) {
+            messageId = Long.parseLong(urlArr[urlArr.length - 2]);
+        }
+
+        return messageId;
+    }
+
+    private boolean checkMessageAuthorization(String requestURI) {
+
+        long messageId = getMessageIdFromRequestUri(requestURI);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         log.info("************* username:{}", username);
 
-        Boolean hasAccess = messageRepository.findByIdWithBoardOwner(messageId)
-                .map(message -> message.getBoard().getOwner().getUsername().equals(username))
-                .orElse(false);
+        boolean hasAccess = false;
+
+        if (isUpdateMessage(requestURI)) {
+            // 메시지 수정은 작성자만 가능
+            hasAccess = isMessageAuthor(username, messageId);
+        } else if (isGetMessage(requestURI)) {
+            // 메시지 조회는 작성자, 소유자 모두 가능
+            hasAccess = isMessageAuthor(username, messageId) || isMessageOwner(username, messageId);
+        }
 
         return hasAccess;
     }
 
-    private boolean shouldNotIntercept(HttpServletRequest request, long messageId) {
-        // 메시지 하나 가져오기
-        if ("GET".equals(request.getMethod())) {
-            if ("true".equals(request.getParameter("deleted"))) {
-                return false;
-            }
-            Boolean isDeleted = messageRepository.findById(messageId)
-                    .map(message -> message.isDeleted())
-                    .orElse(false);
+    // 메시지 업데이트
+    private boolean isUpdateMessage(String requestURI) {
+        return requestURI.matches("^/api/v1/messages/[0-9]+$");
+    }
 
-            return !isDeleted;
-        }
+    // 메시지 가져오기
+    private boolean isGetMessage(String requestURI) {
+        return requestURI.matches("^/api/v1/messages/[0-9]+/member$");
+    }
 
-        // 메시지 업데이트
-        return false;
+    private boolean isMessageOwner(String username, long messageId) {
+        return messageRepository.findByIdWithBoardOwner(messageId)
+                .map(message -> username.equals(message.getBoard().getOwner().getUsername()))
+                .orElse(false);
+    }
+
+    private boolean isMessageAuthor(String username, long messageId) {
+        return messageRepository.findByIdWithAuthor(messageId)
+                .map(message -> username.equals(message.getAuthor().getUsername()))
+                .orElse(false);
     }
 }

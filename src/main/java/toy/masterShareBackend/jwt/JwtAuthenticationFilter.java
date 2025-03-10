@@ -32,7 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
 
         // 인증 필요
-        if (requestURI.matches("^/api/v1/users/[0-9]+/boards$")) {
+        if (requestURI.matches("^/api/v1/users/[0-9]+/boards$") ||
+                requestURI.matches("^/api/v1/boards/[0-9]+/messages/member$") ||
+                requestURI.matches("^/api/v1/messages/[0-9]+/member$")) {
             return false;
         }
 
@@ -46,8 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (requestURI.startsWith("/api/v1/auth/") ||
                 requestURI.startsWith("/api/v1/test") ||
-                requestURI.matches("^/api/v1/users/[a-zA-Z0-9_-]+/boards$")) {
-
+                requestURI.matches("^/api/v1/users/[a-zA-Z0-9_-]+/boards$") ||
+                requestURI.matches("^/api/v1/boards/[0-9]+/messages/guest$") ||
+                requestURI.matches("^/api/v1/messages/[0-9]+/guest$")) {
             return true;
         }
 
@@ -65,16 +68,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 메시지 생성
             if ("POST".equals(request.getMethod())) {
                 return false;
-            }
-
-            // 메시지 목록 가져오기
-            if ("GET".equals(request.getMethod())) {
-                if ("true".equals(request.getParameter("deleted"))) {
-                    return false;
-                }
-                if ("true".equals(request.getParameter("includePrivate"))) {
-                    return false;
-                }
             }
 
             return true;

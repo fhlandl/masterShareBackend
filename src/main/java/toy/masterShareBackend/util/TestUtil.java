@@ -12,7 +12,10 @@ import toy.masterShareBackend.repository.BoardRepository;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.repository.UserRepository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -69,5 +72,20 @@ public class TestUtil {
         }
         message.setPublic(isPublic);
         return messageRepository.save(message);
+    }
+
+    public Set<Integer> pickRandomNumbers(int min, int max, int count) {
+        if (count > max - min + 1) {
+            throw new IllegalArgumentException("Count should be less than the range");
+        }
+
+        Set<Integer> randomNumbers = new HashSet<>();
+        Random random = new Random();
+
+        while (randomNumbers.size() < count) {
+            randomNumbers.add(random.nextInt(max - min + 1) + min);
+        }
+
+        return randomNumbers;
     }
 }

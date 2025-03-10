@@ -55,7 +55,7 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<MessageDto> findMessageList(Long boardId, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
+    public PageResponseDto<MessageDto> findMessageList(Long boardId, boolean isGuestMode, MessageSearchCondition condition, PageRequestDto pageRequestDto) {
 
         PageRequest pageable = PageRequest.of(
                 pageRequestDto.getPage() - 1,
@@ -66,7 +66,7 @@ public class BoardService {
         Page<Message> result = messageRepository.findByBoardIdAndCondition(boardId, condition, pageable);
 
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> convertMessageToMessageDto(msg))
+                .map(msg -> convertMessageToMessageDto(msg, isGuestMode))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
@@ -87,7 +87,7 @@ public class BoardService {
         Page<Message> result = messageRepository.findByAuthorIdAndCondition(authorId, condition, pageable);
 
         List<MessageDto> dtoList = result.getContent().stream()
-                .map(msg -> convertMessageToMessageDto(msg))
+                .map(msg -> convertMessageToMessageDtoWithAllContents(msg))
                 .collect(Collectors.toList());
 
         long totalCount = result.getTotalElements();
@@ -97,27 +97,27 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public MessageDto readMessage(long messageId) {
+    public MessageDto readMessage(long messageId, boolean isGuestMode) {
 
         Message message = messageRepository.findById(messageId).orElseThrow();
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, isGuestMode);
     }
 
     public MessageDto updateMessage(long messageId, MessageUpdateDto dto) {
 
         Message message = messageRepository.findById(messageId).orElseThrow();
 
-        if (dto.getOpened() != null && dto.getOpened()) {
+        if (Boolean.TRUE.equals(dto.getOpened())) {
             message.open();
         }
-        if (dto.getDeleted() != null && dto.getDeleted()) {
+        if (Boolean.TRUE.equals(dto.getDeleted())) {
             message.delete();
         }
 
         message.setLastModifiedAt(LocalDateTime.now());
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, false);
     }
 
     public MessageDto createMessage(Long boardId, Long authorId, CreateMessageRequest dto) {
@@ -139,7 +139,7 @@ public class BoardService {
 
         Message message = messageRepository.save(newMessage);
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, false);
     }
 
     public MessageDto createRandomMessage(Long authorId, CreateMessageRequest dto) {
@@ -162,7 +162,7 @@ public class BoardService {
 
         Message message = messageRepository.save(newMessage);
 
-        return convertMessageToMessageDto(message);
+        return convertMessageToMessageDto(message, true);
     }
 
     @Transactional(readOnly = true)
@@ -171,16 +171,33 @@ public class BoardService {
         Board randomBoard = admin.getBoards().get(0);
         Message randomMessage = messageRepository.findRandomMessageByBoardId(randomBoard.getId()).orElseThrow();
 
-        return convertMessageToMessageDto(randomMessage);
+        return convertMessageToMessageDto(randomMessage, true);
     }
 
-    private MessageDto convertMessageToMessageDto(Message message) {
+    private MessageDto convertMessageToMessageDto(Message message, boolean isGuestMode) {
         String content = message.isOpened() ? message.getContent() : null;
+        if (isGuestMode && (!message.isPublic() || message.isDeleted())) {
+            content = null;
+        }
         return MessageDto.builder()
                 .messageId(message.getId())
                 .sender(message.getSender())
                 .title(message.getTitle())
                 .content(content)
+                .opened(message.isOpened())
+                .deleted(message.isDeleted())
+                .isPublic(message.isPublic())
+                .createdAt(message.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
+                .build();
+    }
+
+    // 내가 작성한 메시지 목록은 모든 내용을 볼 수 있어야 함
+    private MessageDto convertMessageToMessageDtoWithAllContents(Message message) {
+        return MessageDto.builder()
+                .messageId(message.getId())
+                .sender(message.getSender())
+                .title(message.getTitle())
+                .content(message.getContent())
                 .opened(message.isOpened())
                 .deleted(message.isDeleted())
                 .isPublic(message.isPublic())

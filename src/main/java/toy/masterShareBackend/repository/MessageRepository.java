@@ -11,6 +11,9 @@ public interface MessageRepository extends JpaRepository<Message, Long>, Message
     @Query("select m from Message m join fetch m.board b join fetch b.owner where m.id = :messageId")
     Optional<Message> findByIdWithBoardOwner(long messageId);
 
+    @Query("select m from Message m join fetch m.author a where m.id = :messageId")
+    Optional<Message> findByIdWithAuthor(long messageId);
+
     @Query(value = "SELECT m FROM Message m WHERE m.board.id = :boardId ORDER BY FUNCTION('RANDOM') LIMIT 1")
     Optional<Message> findRandomMessageByBoardId(Long boardId);
 }

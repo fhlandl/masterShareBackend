@@ -13,7 +13,7 @@ import org.springdoc.core.annotations.ParameterObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageRequestDto {
-    @Schema(example = "1")
+    @Schema(example = "2")
     private int page = 1;
 
     @Schema(example = "10")

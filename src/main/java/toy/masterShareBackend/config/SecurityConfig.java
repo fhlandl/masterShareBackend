@@ -51,9 +51,10 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/api/v1/auth/join"),
                                 new AntPathRequestMatcher("/api/v1/auth/token/refresh"),
                                 new AntPathRequestMatcher("/api/v1/test/*"),
-                                new AntPathRequestMatcher("/api/v1/boards/*/messages", "GET"),
                                 new AntPathRequestMatcher("/api/v1/users/*/boards"),
-                                new AntPathRequestMatcher("/api/v1/messages/*")
+                                new AntPathRequestMatcher("/api/v1/boards/*/messages/guest", "GET"),
+                                new AntPathRequestMatcher("/api/v1/messages/*/guest", "GET"),
+                                new AntPathRequestMatcher("/api/v1/boards/random/messages", "GET")
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

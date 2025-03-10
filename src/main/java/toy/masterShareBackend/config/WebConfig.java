@@ -30,6 +30,6 @@ public class WebConfig implements WebMvcConfigurer {
 //                .addPathPatterns("/api/v1/users/*/boards");
 
         registry.addInterceptor(messageAccessInterceptor)
-                .addPathPatterns("/api/v1/messages/*");
+                .addPathPatterns("/api/v1/messages/*", "/api/v1/messages/*/member");
     }
 }

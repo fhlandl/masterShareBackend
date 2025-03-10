@@ -11,5 +11,5 @@ public class MessageSearchCondition {
 
     private Boolean deleted;
 
-    private Boolean includePrivate;
+    private Boolean isPublic;
 }

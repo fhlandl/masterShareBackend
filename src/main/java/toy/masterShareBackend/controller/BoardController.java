@@ -36,37 +36,44 @@ public class BoardController {
         return ResponseWrapper.success(userBoardsResponse);
     }
 
-    @Operation(summary = "메시지 목록 가져오기", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴")
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"isPublic\":true,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
-    ))
-    @GetMapping("/boards/{boardId}/messages")
-    public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> messages(
+    @Operation(summary = "메시지 목록 가져오기 (member)", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴(not opened의 경우 내용 표시 안됨)", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200")
+    @GetMapping("/boards/{boardId}/messages/member")
+    public ResponseEntity<MessagePageResponseWrapper> memberMessages(
             @Parameter(example = "1111") @PathVariable Long boardId,
             @ModelAttribute PageRequestDto pageRequestDto,
             @Parameter(description = "open 여부", example = "true") @RequestParam(required = false) Boolean opened,
-            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted,
-            @Parameter(description = "비공개 메시지 포함 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean includePrivate) {
+            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false) Boolean deleted,
+            @Parameter(description = "public 여부", example = "true") @RequestParam(required = false) Boolean isPublic) {
 
-        MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, includePrivate);
-        PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardId, condition, pageRequestDto);
+        MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, isPublic);
+        PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardId, false, condition, pageRequestDto);
 
-        return ResponseWrapper.success(messageList);
+        return MessagePageResponseWrapper.success(messageList);
     }
 
-    @Operation(summary = "내가 작성한 메시지 목록 가져오기", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"dataList\":[{\"messageId\":1111,\"sender\":\"트리티티\",\"title\":\"메시지제목\",\"content\":\"null\",\"opened\":false,\"isPublic\":false,\"createdAt\":\"2024.12.1921:45\"}],\"pageRequest\":{\"page\":1,\"size\":10},\"hasPrev\":true,\"hasNext\":true,\"totalDataCount\":0,\"currentPage\":0,\"prevPage\":0,\"nextPage\":0,\"lastPage\":0},\"error\":null}")
-    ))
+    @Operation(summary = "메시지 목록 가져오기 (guest)", description = "boardId에 해당하는 게시판의 메시지 목록을 가져옴(deleted 또는 not opened 또는 private 상태의 경우 내용 표시 안됨)")
+    @ApiResponse(responseCode = "200")
+    @GetMapping("/boards/{boardId}/messages/guest")
+    public ResponseEntity<MessagePageResponseWrapper> guestMessages(
+            @Parameter(example = "1111") @PathVariable Long boardId,
+            @ModelAttribute PageRequestDto pageRequestDto) {
+
+        MessageSearchCondition condition = new MessageSearchCondition(null, false, null);
+        PageResponseDto<MessageDto> messageList = boardService.findMessageList(boardId, true, condition, pageRequestDto);
+
+        return MessagePageResponseWrapper.success(messageList);
+    }
+
+    @Operation(summary = "내가 작성한 메시지 목록 가져오기", description = "내가 작성한 메시지 목록을 가져옴(메시지 property에 상관 없이 내용 확인 가능)", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200")
     @GetMapping("/users/{userKey}/messages")
-    public ResponseEntity<ResponseWrapper<PageResponseDto<MessageDto>>> writtenMessages(
+    public ResponseEntity<MessagePageResponseWrapper> writtenMessages(
             @Parameter(example = "1111") @PathVariable String userKey,
             @ModelAttribute PageRequestDto pageRequestDto,
             @Parameter(description = "open 여부", example = "true") @RequestParam(required = false) Boolean opened,
-            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false, defaultValue = "false") Boolean deleted,
-            @Parameter(description = "비공개 메시지 포함 여부", example = "true") @RequestParam(required = false, defaultValue = "true") Boolean includePrivate,
+            @Parameter(description = "delete 여부", example = "false") @RequestParam(required = false) Boolean deleted,
+            @Parameter(description = "public 여부", example = "true") @RequestParam(required = false) Boolean isPublic,
             Authentication authentication) {
 
         try {
@@ -74,27 +81,40 @@ public class BoardController {
             if (!userKey.equals(user.getUserKey())) {
                 throw new RuntimeException("invalid access");
             }
-            MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, includePrivate);
+            MessageSearchCondition condition = new MessageSearchCondition(opened, deleted, isPublic);
             PageResponseDto<MessageDto> messageList = boardService.findUserWriteMessageList(user.getId(), condition, pageRequestDto);
 
-            return ResponseWrapper.success(messageList);
+            return MessagePageResponseWrapper.success(messageList);
         } catch (RuntimeException e) {
 
-            return ResponseWrapper.failAuth(1234, e.getMessage());
+            return MessagePageResponseWrapper.failAuth(1234, e.getMessage());
         }
     }
 
-    @Operation(summary = "메시지 하나 가져오기", description = "messageId를 가진 메시지를 가져옴(open 상태가 아닌 경우 오류 발생)")
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": 1111,\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
-    ))
-    @GetMapping("/messages/{messageId}")
-    public ResponseEntity<ResponseWrapper<MessageDto>> getMessage(
+    @Operation(summary = "메시지 하나 가져오기 (메시지 소유자 or 작성자)", description = "messageId를 가진 메시지를 가져옴(not opened의 경우 내용 표시 안됨)", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200")
+    @GetMapping("/messages/{messageId}/member")
+    public ResponseEntity<ResponseWrapper<MessageDto>> memberMessage(
             @Parameter(example = "1111") @PathVariable Long messageId) {
 
         try {
-            MessageDto messageDto = boardService.readMessage(messageId);
+            MessageDto messageDto = boardService.readMessage(messageId, false);
+            return ResponseWrapper.success(messageDto);
+
+        } catch (RuntimeException e) {
+
+            return ResponseWrapper.fail(1234, e.getMessage());
+        }
+    }
+
+    @Operation(summary = "메시지 하나 가져오기 (guest)", description = "messageId를 가진 메시지를 가져옴(deleted 또는 not opened 또는 private 상태의 경우 내용 표시 안됨)")
+    @ApiResponse(responseCode = "200")
+    @GetMapping("/messages/{messageId}/guest")
+    public ResponseEntity<ResponseWrapper<MessageDto>> guestMessage(
+            @Parameter(example = "1111") @PathVariable Long messageId) {
+
+        try {
+            MessageDto messageDto = boardService.readMessage(messageId, true);
             return ResponseWrapper.success(messageDto);
 
         } catch (RuntimeException e) {
@@ -122,10 +142,7 @@ public class BoardController {
     }
 
     @Operation(summary = "메시지 업데이트", description = "messageId를 가진 메시지를 업데이트", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", content = @Content(
-            schema = @Schema(implementation = ResponseWrapper.class),
-            examples = @ExampleObject(value = "{\"success\":true,\"data\":{\"messageId\": 1111,\"sender\": \"트리티티\",\"title\": \"메시지 제목\",\"content\": \"메시지 내용\",\"opened\": true,\"createdAt\": \"2024.12.19 21:45\"},\"error\":null}")
-    ))
+    @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "403", content = @Content(
             schema = @Schema(implementation = ResponseWrapper.class),
             examples = @ExampleObject(value = "{\"success\":false,\"data\":null,\"error\":{\"code\":4321,\"message\":\"Message access denied\"}}")
@@ -156,7 +173,7 @@ public class BoardController {
         return ResponseWrapper.success(messageDto);
     }
 
-    @Operation(summary = "랜덤 메시지 생성", description = "랜덤 게시판에 메시지를 생성함")
+    @Operation(summary = "랜덤 메시지 생성", description = "랜덤 게시판에 메시지를 생성함(isPublic은 무조건 true로 설정되므로 생략 가능)", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200")
     @PostMapping("/boards/random/messages")
     public ResponseEntity<ResponseWrapper<MessageDto>> createRandomMessage(@RequestBody CreateMessageRequest dto, Authentication authentication) {

@@ -14,9 +14,7 @@ import toy.masterShareBackend.dto.*;
 import toy.masterShareBackend.repository.MessageRepository;
 import toy.masterShareBackend.util.TestUtil;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static toy.masterShareBackend.domain.UserRole.*;
@@ -38,42 +36,99 @@ class BoardServiceTest {
     @PersistenceContext
     EntityManager entityManager;
 
+    final int MESSAGE_COUNT = 40;
+    final int OPENED_MESSAGE_COUNT = 25;
+    final int DELETED_MESSAGE_COUNT = 10;
+    final int PUBLIC_MESSAGE_COUNT = 30;
+
+    final int RANDOM_MESSAGE_COUNT = 10;
+
 
     private String[][] getMessageContentsForTest() {
-        String[][] messageContents = {
-                {"제목1", "아름다운 이 땅에 금수강산에 단군 할아버지가 터 잡으시고"},
-                {"제목2", "홍익인간 뜻으로 나라 세우니 대대손손 훌륭한 인물도 많아"},
-                {"제목3", "고구려 세운 동명왕 백제 온조왕 알에서 나온 혁거세"},
-                {"제목4", "만주 벌판 달려라 광개토대왕 신라 장군 이사부"},
-                {"제목5", "백결선생 떡방아 삼천궁녀 의자왕"},
-                {"제목6", "황산벌의 계백 맞서 싸운 관창 역사는 흐른다!"},
-                {"제목7", "말 목 자른 김유신 통일 문무왕 원효대사 해골물 혜초 천축국"},
-                {"제목8", "바다의 왕자 장보고 발해 대조영 귀주대첩 강감찬 서희 거란족"},
-                {"제목9", "무단정치 정중부 화포 최무선 죽림칠현 김부식"},
-                {"제목10", "지눌 국사 조계종 의천 천태종 대마도 정벌 이종무"},
-                {"제목11", "일편단심 정몽주 목화 씨는 문익점"},
-                {"제목12", "해동공자 최충 삼국유사 일연 역사는 흐른다!"},
-                {"제목13", "황금 보기를 돌 같이 하라 최영 장군의 말씀 받들자"},
-                {"제목14", "황희 정승 맹사성 과학 장영실 신숙주와 한명회 역사는 안다"},
-                {"제목15", "십만 양병 이율곡 주리 이퇴계 신사임당 오죽헌"},
-                {"제목16", "잘 싸운다 곽재우 조헌 김시민 나라 구한 이순신"},
-                {"제목17", "태정태세문단세 사육신과 생육신"},
-                {"제목18", "몸 바쳐서 논개 행주치마 권율 역사는 흐른다!"},
-                {"제목19", "번쩍번쩍 홍길동 의적 임꺽정 대쪽 같은 삼학사 어사 박문수"},
-                {"제목20", "삼 년 공부 한석봉 단원 풍속도 방랑 시인 김삿갓 지도 김정호"}
-        };
+        String[][] messageContents = new String[MESSAGE_COUNT][2];
+        for (int i = 0; i < messageContents.length; i++) {
+            messageContents[i][0] = "제목" + i;
+            messageContents[i][1] = "내용" + i;
+        }
         return messageContents;
     }
 
     private String[][] getRandomMessageContentsForTest() {
-        String[][] randomMessageContents = {
-                {"랜덤1", "랜덤1 메시지입니다."},
-                {"랜덤2", "랜덤2 메시지입니다."},
-                {"랜덤3", "랜덤3 메시지입니다."},
-                {"랜덤4", "랜덤4 메시지입니다."},
-                {"랜덤5", "랜덤5 메시지입니다."}
-        };
-        return randomMessageContents;
+        String[][] messageContents = new String[RANDOM_MESSAGE_COUNT][2];
+        for (int i = 0; i < messageContents.length; i++) {
+            messageContents[i][0] = "랜덤" + i;
+            messageContents[i][1] = "랜덤 메시지 내용" + i;
+        }
+        return messageContents;
+    }
+
+    private Set<Integer> getOpenedMessageIndexSet() {
+        return testUtil.pickRandomNumbers(0, MESSAGE_COUNT - 1, OPENED_MESSAGE_COUNT);
+    }
+
+    private Set<Integer> getDeletedMessageIndexSet() {
+        return testUtil.pickRandomNumbers(0, MESSAGE_COUNT - 1, DELETED_MESSAGE_COUNT);
+    }
+
+    private Set<Integer> getPublicMessageIndexSet() {
+        return testUtil.pickRandomNumbers(0, MESSAGE_COUNT - 1, PUBLIC_MESSAGE_COUNT);
+    }
+
+    private void initMessageTestData(
+            String[][] messageContents,
+            Set<Integer> openedMsgs, Set<Integer> deletedMsgs, Set<Integer> publicMsgs,
+            Board board, User author, String sender) {
+
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
+            boolean opened = openedMsgs.contains(i);
+            boolean deleted = deletedMsgs.contains(i);
+            boolean isPublic = publicMsgs.contains(i);
+
+            testUtil.createMessage(board, author, sender, msgSrc[0], msgSrc[1], opened, deleted, isPublic);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    private void initRandomMessageTestData() {
+        // 일반 게시판 데이터
+        User test = testUtil.createUser("test");
+        Board testBoard = testUtil.createBoard(test, 10);
+
+        User guest = testUtil.createUser("guest");
+        Board guestBoard = testUtil.createBoard(guest, 10);
+
+        String[][] messageContents = getMessageContentsForTest();
+        Set<Integer> openedMsgs = getOpenedMessageIndexSet();
+        Set<Integer> deletedMsgs = getDeletedMessageIndexSet();
+        Set<Integer> publicMsgs = getPublicMessageIndexSet();
+
+        for (int i = 0; i < messageContents.length; i++) {
+            String[] msgSrc = messageContents[i];
+            boolean opened = openedMsgs.contains(i);
+            boolean deleted = deletedMsgs.contains(i);
+            boolean isPublic = publicMsgs.contains(i);
+
+            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], opened, deleted, isPublic);
+        }
+
+        // admin 사용자 추가
+        User admin = testUtil.createUserWithRoles("admin", List.of(USER, MANAGER, ADMIN));
+        Board randomBoard = testUtil.createBoard(admin, 10);
+
+        User randomAuthor = testUtil.createUser("random");
+
+        String[][] randomMessageContents = getRandomMessageContentsForTest();
+
+        for (int i = 0; i < randomMessageContents.length; i++) {
+            String[] msgSrc = randomMessageContents[i];
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, true);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
@@ -94,6 +149,79 @@ class BoardServiceTest {
         assertThat(response.getBoards().get(1).getMaxSize()).isEqualTo(board2.getMaxSize());
     }
 
+    private Object[] getTotalCountAndExpectation(
+            String[][] messageContents,
+            Set<Integer> openedSet, Set<Integer> deletedSet, Set<Integer> publicSet,
+            boolean isGuestMode, boolean isShowAllContents, MessageSearchCondition condition,
+            int pageNum, int pageSize) {
+
+        Boolean opened = condition.getOpened();
+        Boolean deleted = condition.getDeleted();
+        Boolean isPublic = condition.getIsPublic();
+
+        List<String[]> result = new ArrayList<>();
+        int count = 0;
+
+        for (int idx = MESSAGE_COUNT - 1; idx >= 0; idx--) {
+            if ((Boolean.TRUE.equals(opened) && !openedSet.contains(idx)) ||
+                    Boolean.FALSE.equals(opened) && openedSet.contains(idx)) {
+                continue;
+            }
+            if ((Boolean.TRUE.equals(deleted) && !deletedSet.contains(idx)) ||
+                    Boolean.FALSE.equals(deleted) && deletedSet.contains(idx)) {
+                continue;
+            }
+            if ((Boolean.TRUE.equals(isPublic) && !publicSet.contains(idx)) ||
+                    Boolean.FALSE.equals(isPublic) && publicSet.contains(idx)) {
+                continue;
+            }
+
+            String title = messageContents[idx][0];
+            String content;
+            if (isShowAllContents) {
+                content = messageContents[idx][1];
+            } else {
+                content = openedSet.contains(idx) ? messageContents[idx][1] : null;
+                if (isGuestMode && !publicSet.contains(idx)) {
+                    content = null;
+                }
+            }
+            result.add(new String[]{title, content});
+
+            count++;
+        }
+
+        int fromIdx = pageSize * (pageNum - 1);
+        int toIdx = Math.min(fromIdx + pageSize - 1, count - 1);
+
+        if (count < fromIdx + 1) {
+            log.info("{} page doesn't exist", pageNum);
+            return new Object[]{count, new String[][]{}};
+        }
+
+        String[][] expectation = result.subList(fromIdx, toIdx + 1).stream().toArray(String[][]::new);
+
+        return new Object[]{count, expectation};
+    }
+
+    private void compareMessageResponse(PageResponseDto<MessageDto> response, Object[] totalCountAndExpectation, String sender, int curPage, int pageSize) {
+        int totalCount = (int) totalCountAndExpectation[0];
+        String[][] expectation = (String[][]) totalCountAndExpectation[1];
+
+        for (int i = 0; i < response.getDataList().size(); i++) {
+            MessageDto messageDto = response.getDataList().get(i);
+            assertThat(messageDto.getTitle()).isEqualTo(expectation[i][0]);
+            assertThat(messageDto.getContent()).isEqualTo(expectation[i][1]);
+            assertThat(messageDto.getSender()).isEqualTo(sender);
+        }
+
+        Integer nextPage = totalCount > curPage * pageSize ? curPage + 1 : null;
+
+        assertThat(response.getCurrentPage()).isEqualTo(curPage);
+        assertThat(response.getPrevPage()).isEqualTo(curPage - 1);
+        assertThat(response.getNextPage()).isEqualTo(nextPage);
+    }
+
     @Test
     void findMessageList() {
         // given
@@ -102,131 +230,43 @@ class BoardServiceTest {
         Board board = testUtil.createBoard(owner, 10);
 
         String[][] messageContents = getMessageContentsForTest();
+        Set<Integer> openedMsgs = getOpenedMessageIndexSet();
+        Set<Integer> deletedMsgs = getDeletedMessageIndexSet();
+        Set<Integer> publicMsgs = getPublicMessageIndexSet();
 
-        List<Integer> openedMsgs = List.of(5, 12, 19);
-        List<Integer> deletedMsgs = List.of(4, 15);
-        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
-        for (int i = 0; i < messageContents.length; i++) {
-            String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
-                    openedMsgs.contains(i),
-                    deletedMsgs.contains(i),
-                    publicMsgs.contains(i));
-        }
+        String sender = author.getNickname();
+
+        initMessageTestData(messageContents, openedMsgs, deletedMsgs, publicMsgs, board, author, sender);
 
         entityManager.flush();
         entityManager.clear();
 
-        // when
         int pageNum = 2;
-        int pageSize= 5;
+        int pageSize= 2;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, null, null);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
 
-        // then
-        for (int i = 0; i < response.getDataList().size(); i++) {
-            MessageDto messageDto = response.getDataList().get(i);
-            assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
-            String content = openedMsgs.contains(14 - i) ? messageContents[14 - i][1] : null;
-            assertThat(messageDto.getContent()).isEqualTo(content);
-            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
+        MessageSearchCondition condition;
+        PageResponseDto<MessageDto> response;
+        Object[] totalCountAndExpectation;
+
+        for (Boolean opened : new Boolean[]{null, true, false}) {
+            for (Boolean deleted : new Boolean[]{null, true, false}) {
+                for (Boolean isPublic : new Boolean[]{null, true, false}) {
+                    log.info("CASE: opened={}, deleted={}, isPublic={}, isGuestMode={}", opened, deleted, isPublic, false);
+                    condition = new MessageSearchCondition(opened, deleted, isPublic);
+                    totalCountAndExpectation = getTotalCountAndExpectation(messageContents, openedMsgs, deletedMsgs, publicMsgs, false, false, condition, pageNum, pageSize);
+                    response = boardService.findMessageList(board.getId(), false, condition, pageRequestDto);
+                    compareMessageResponse(response, totalCountAndExpectation, sender, pageNum, pageSize);
+                }
+            }
         }
 
-        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
-        assertThat(response.getPrevPage()).isEqualTo(pageNum - 1);
-        assertThat(response.getNextPage()).isEqualTo(pageNum + 1);
-    }
-
-    @Test
-    void findMessageList_opened_not_deleted() {
-        // given
-        User owner = testUtil.createUser("test");
-        User author = testUtil.createUser("guest");
-        Board board = testUtil.createBoard(owner, 10);
-
-        String[][] messageContents = getMessageContentsForTest();
-
-        List<Integer> openedMsgs = List.of(5, 12, 19);
-        List<Integer> deletedMsgs = List.of(5, 15);
-        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
-
-        List<Integer> openedAndNotDeleted = openedMsgs.stream()
-                .filter(e -> !deletedMsgs.contains(e))
-                .collect(Collectors.toList());
-        for (int i = 0; i < messageContents.length; i++) {
-            String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
-                    openedMsgs.contains(i),
-                    deletedMsgs.contains(i),
-                    publicMsgs.contains(i));
-        }
-
-        // when
-        int pageNum = 1;
-        int pageSize= 3;
-        PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(true, false, null);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
-
-        // then
-        for (int i = 0; i < response.getDataList().size(); i++) {
-            int contentIdx = openedAndNotDeleted.get(1 - i);
-            MessageDto messageDto = response.getDataList().get(i);
-            assertThat(messageDto.getTitle()).isEqualTo(messageContents[contentIdx][0]);
-            String content = openedMsgs.contains(contentIdx) ? messageContents[contentIdx][1] : null;
-            assertThat(messageDto.getContent()).isEqualTo(content);
-            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
-            assertThat(messageDto.isOpened()).isTrue();
-        }
-
-        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
-        assertThat(response.getPrevPage()).isEqualTo(null);
-        assertThat(response.getNextPage()).isEqualTo(null);
-    }
-
-    @Test
-    void findMessageList_deleted() {
-        // given
-        User owner = testUtil.createUser("test");
-        User author = testUtil.createUser("guest");
-        Board board = testUtil.createBoard(owner, 10);
-
-        String[][] messageContents = getMessageContentsForTest();
-
-        List<Integer> openedMsgs = List.of(5, 12, 19);
-        List<Integer> deletedMsgs = List.of(5, 15);
-        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
-
-        for (int i = 0; i < messageContents.length; i++) {
-            String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
-                    openedMsgs.contains(i),
-                    deletedMsgs.contains(i),
-                    publicMsgs.contains(i));
-        }
-
-        // when
-        int pageNum = 1;
-        int pageSize= 5;
-        PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, true, null);
-        PageResponseDto<MessageDto> response = boardService.findMessageList(board.getId(), condition, pageRequestDto);
-
-        // then
-        for (int i = 0; i < response.getDataList().size(); i++) {
-            int contentIdx = deletedMsgs.get(1 - i);
-            MessageDto messageDto = response.getDataList().get(i);
-            assertThat(messageDto.getTitle()).isEqualTo(messageContents[contentIdx][0]);
-            String content = openedMsgs.contains(contentIdx) ? messageContents[contentIdx][1] : null;
-            assertThat(messageDto.getContent()).isEqualTo(content);
-            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
-            assertThat(messageDto.isDeleted()).isTrue();
-        }
-
-        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
-        assertThat(response.getPrevPage()).isEqualTo(null);
-        assertThat(response.getNextPage()).isEqualTo(null);
+        // CASE: opened=null, deleted=false, isPublic=null, isGuestMode=true
+        log.info("CASE: opened=null, deleted=false, isPublic=null, isGuestMode=true");
+        condition = new MessageSearchCondition(null, false, null);
+        totalCountAndExpectation = getTotalCountAndExpectation(messageContents, openedMsgs, deletedMsgs, publicMsgs, true, false, condition, pageNum, pageSize);
+        response = boardService.findMessageList(board.getId(), true, condition, pageRequestDto);
+        compareMessageResponse(response, totalCountAndExpectation, sender, pageNum, pageSize);
     }
 
     @Test
@@ -242,13 +282,20 @@ class BoardServiceTest {
 
         Message message = testUtil.createMessage(board, author, sender, title, content, true, false, false);
 
-        // when
-        MessageDto messageDto = boardService.readMessage(message.getId());
+        log.info("CASE: isGuestMode=false");
+        MessageDto messageDto = boardService.readMessage(message.getId(), false);
 
-        // then
         assertThat(messageDto.getSender()).isEqualTo(sender);
         assertThat(messageDto.getTitle()).isEqualTo(title);
         assertThat(messageDto.getContent()).isEqualTo(content);
+        assertThat(messageDto.isOpened()).isTrue();
+
+        log.info("CASE: isGuestMode=true");
+        messageDto = boardService.readMessage(message.getId(), true);
+
+        assertThat(messageDto.getSender()).isEqualTo(sender);
+        assertThat(messageDto.getTitle()).isEqualTo(title);
+        assertThat(messageDto.getContent()).isNull();
         assertThat(messageDto.isOpened()).isTrue();
     }
 
@@ -295,7 +342,7 @@ class BoardServiceTest {
         MessageDto messageDto = boardService.updateMessage(message.getId(), messageUpdateDto);
 
         // then
-        MessageDto foundMessage = boardService.readMessage(messageDto.getMessageId());
+        MessageDto foundMessage = boardService.readMessage(messageDto.getMessageId(), true);
         assertThat(foundMessage.isDeleted()).isTrue();
     }
 
@@ -320,35 +367,6 @@ class BoardServiceTest {
         assertThat(messageDto.getTitle()).isEqualTo(dto.getTitle());
         assertThat(messageDto.getContent()).isNull();
         assertThat(messageDto.isOpened()).isFalse();
-    }
-
-    private void initRandomMessageTestData() {
-        User test = testUtil.createUser("test");
-        Board testBoard = testUtil.createBoard(test, 10);
-
-        User guest = testUtil.createUser("guest");
-        Board guestBoard = testUtil.createBoard(guest, 10);
-
-        String[][] messageContents = getMessageContentsForTest();
-
-        List<Integer> openedMsgs = List.of(5, 12, 19);
-        for (int i = 0; i < messageContents.length; i++) {
-            String[] msgSrc = messageContents[i];
-            testUtil.createMessage(testBoard, guest, guest.getNickname(), msgSrc[0], msgSrc[1], openedMsgs.contains(i), false, false);
-        }
-
-        // admin 사용자 추가
-        User admin = testUtil.createUserWithRoles("admin", List.of(USER, MANAGER, ADMIN));
-        Board randomBoard = testUtil.createBoard(admin, 10);
-
-        User randomAuthor = testUtil.createUser("random");
-
-        String[][] randomMessageContents = getRandomMessageContentsForTest();
-
-        for (int i = 0; i < randomMessageContents.length; i++) {
-            String[] msgSrc = randomMessageContents[i];
-            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, true);
-        }
     }
 
     @Test
@@ -424,40 +442,32 @@ class BoardServiceTest {
         Board board = testUtil.createBoard(owner, 10);
 
         String[][] messageContents = getMessageContentsForTest();
+        Set<Integer> openedMsgs = getOpenedMessageIndexSet();
+        Set<Integer> deletedMsgs = getDeletedMessageIndexSet();
+        Set<Integer> publicMsgs = getPublicMessageIndexSet();
 
-        List<Integer> openedMsgs = List.of(5, 12, 19);
-        List<Integer> deletedMsgs = List.of(4, 15);
-        List<Integer> publicMsgs = List.of(5, 12, 14, 16);
+        String sender = author.getNickname();
 
-        for (int i = 0; i < messageContents.length; i++) {
-            String[] msgSrc = messageContents[i];
-            testUtil.createMessage(board, author, author.getNickname(), msgSrc[0], msgSrc[1],
-                    openedMsgs.contains(i),
-                    deletedMsgs.contains(i),
-                    publicMsgs.contains(i));
-        }
+        initMessageTestData(messageContents, openedMsgs, deletedMsgs, publicMsgs, board, author, sender);
 
-        entityManager.flush();
-        entityManager.clear();
-
-        // when
         int pageNum = 2;
-        int pageSize= 5;
+        int pageSize= 2;
         PageRequestDto pageRequestDto = new PageRequestDto(pageNum, pageSize);
-        MessageSearchCondition condition = new MessageSearchCondition(null, null, null);
-        PageResponseDto<MessageDto> response = boardService.findUserWriteMessageList(author.getId(), condition, pageRequestDto);
 
-        // then
-        for (int i = 0; i < response.getDataList().size(); i++) {
-            MessageDto messageDto = response.getDataList().get(i);
-            assertThat(messageDto.getTitle()).isEqualTo(messageContents[14 - i][0]);
-            String content = openedMsgs.contains(14 - i) ? messageContents[14 - i][1] : null;
-            assertThat(messageDto.getContent()).isEqualTo(content);
-            assertThat(messageDto.getSender()).isEqualTo(author.getNickname());
+        MessageSearchCondition condition;
+        PageResponseDto<MessageDto> response;
+        Object[] totalCountAndExpectation;
+
+        for (Boolean opened : new Boolean[]{null, true, false}) {
+            for (Boolean deleted : new Boolean[]{null, true, false}) {
+                for (Boolean isPublic : new Boolean[]{null, true, false}) {
+                    log.info("CASE: opened={}, deleted={}, isPublic={}, isGuestMode={}", opened, deleted, isPublic, false);
+                    condition = new MessageSearchCondition(opened, deleted, isPublic);
+                    totalCountAndExpectation = getTotalCountAndExpectation(messageContents, openedMsgs, deletedMsgs, publicMsgs, false, true, condition, pageNum, pageSize);
+                    response = boardService.findUserWriteMessageList(author.getId(), condition, pageRequestDto);
+                    compareMessageResponse(response, totalCountAndExpectation, sender, pageNum, pageSize);
+                }
+            }
         }
-
-        assertThat(response.getCurrentPage()).isEqualTo(pageNum);
-        assertThat(response.getPrevPage()).isEqualTo(pageNum - 1);
-        assertThat(response.getNextPage()).isEqualTo(pageNum + 1);
     }
 }

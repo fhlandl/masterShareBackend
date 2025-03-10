@@ -88,8 +88,8 @@ public class MessageCustomRepositoryImpl implements MessageCustomRepository {
             sb.append(" and m.deleted = :deleted");
         }
 
-        if (condition.getIncludePrivate() != null && condition.getIncludePrivate().equals(false)) {
-            sb.append(" and m.isPublic = true");
+        if (condition.getIsPublic() != null) {
+            sb.append(" and m.isPublic = :isPublic");
         }
 
         return sb.toString();
@@ -122,6 +122,9 @@ public class MessageCustomRepositoryImpl implements MessageCustomRepository {
         }
         if (condition.getDeleted() != null) {
             query.setParameter("deleted", condition.getDeleted());
+        }
+        if (condition.getIsPublic() != null) {
+            query.setParameter("isPublic", condition.getIsPublic());
         }
     }
 }

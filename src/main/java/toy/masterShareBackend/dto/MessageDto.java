@@ -22,7 +22,7 @@ public class MessageDto {
     @Schema(example = "메시지 제목")
     private String title;
 
-    @Schema(example = "null", nullable = true)
+    @Schema(example = "메시지 내용", nullable = true)
     private String content;
 
     @Schema(example = "false")
@@ -37,4 +37,9 @@ public class MessageDto {
 
     @Schema(example = "2024.12.19 21:45")
     private String createdAt;
+
+    // 직렬화시 "isPublic", "public" 둘다 존재하는 문제 해결
+    public boolean getIsPublic() {
+        return isPublic;
+    }
 }
