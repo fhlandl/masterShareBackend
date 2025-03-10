@@ -108,11 +108,22 @@ public class BoardService {
 
         Message message = messageRepository.findById(messageId).orElseThrow();
 
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            message.updateTitle(dto.getTitle());
+        }
+
+        if (dto.getContent() != null && !dto.getContent().isBlank()) {
+            message.updateContent(dto.getContent());
+        }
+
         if (Boolean.TRUE.equals(dto.getOpened())) {
             message.open();
         }
+
         if (Boolean.TRUE.equals(dto.getDeleted())) {
             message.delete();
+        } else if (Boolean.FALSE.equals(dto.getDeleted())) {
+            message.restore();
         }
 
         message.setLastModifiedAt(LocalDateTime.now());

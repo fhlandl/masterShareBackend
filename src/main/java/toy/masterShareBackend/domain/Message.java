@@ -88,4 +88,16 @@ public class Message {
     public void delete() {
         this.deleted = true;
     }
+
+    public void restore() {
+        this.deleted = false;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
