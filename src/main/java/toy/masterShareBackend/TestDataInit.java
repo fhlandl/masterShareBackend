@@ -88,7 +88,7 @@ public class TestDataInit {
 
         for (int i = 0; i < messageContents.length; i++) {
             String[] msgSrc = messageContents[i];
-            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, false);
+            testUtil.createMessage(randomBoard, randomAuthor, randomAuthor.getNickname(), msgSrc[0], msgSrc[1], true, false, true);
         }
     }
 }

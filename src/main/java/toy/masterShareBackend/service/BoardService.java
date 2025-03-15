@@ -173,7 +173,7 @@ public class BoardService {
 
         Message message = messageRepository.save(newMessage);
 
-        return convertMessageToMessageDto(message, true);
+        return convertMessageToMessageDto(message, false);
     }
 
     @Transactional(readOnly = true)
@@ -182,7 +182,7 @@ public class BoardService {
         Board randomBoard = admin.getBoards().get(0);
         Message randomMessage = messageRepository.findRandomMessageByBoardId(randomBoard.getId()).orElseThrow();
 
-        return convertMessageToMessageDto(randomMessage, true);
+        return convertMessageToMessageDto(randomMessage, false);
     }
 
     private MessageDto convertMessageToMessageDto(Message message, boolean isGuestMode) {
